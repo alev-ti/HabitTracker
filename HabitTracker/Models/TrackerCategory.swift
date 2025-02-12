@@ -1,7 +1,5 @@
-//
-//  Untitled.swift
-//  HabitTracker
-//
-//  Created by alevtine on 5.2.25..
-//
+struct TrackerCategory {
+    let title: String
+    let trackers: [Tracker]
+}
 

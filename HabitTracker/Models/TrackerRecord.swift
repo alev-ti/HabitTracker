@@ -1,7 +1,7 @@
-//
-//  Untitled.swift
-//  HabitTracker
-//
-//  Created by alevtine on 5.2.25..
-//
+import Foundation
+
+struct TrackerRecord {
+    let id: UUID
+    let date: Date
+}
 
