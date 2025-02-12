@@ -1,22 +1,5 @@
 import UIKit
 
-// Моки данных
-let mockCategories: [TrackerCategory] = [
-    TrackerCategory(
-        title: "Домашний уют",
-        trackers: [
-            Tracker(id: UUID(), name: "Поливать растения", color: .systemGreen, emoji: "🌱", schedule: [.Monday, .Wednesday, .Friday])
-        ]
-    ),
-    TrackerCategory(
-        title: "Радостные мелочи",
-        trackers: [
-            Tracker(id: UUID(), name: "Кошка заслонила камеру на созвоне", color: .systemYellow, emoji: "🐱", schedule: [.Tuesday, .Thursday]),
-            Tracker(id: UUID(), name: "Бабушка прислала открытку в вотсап", color: .systemOrange, emoji: "💌", schedule: [.Saturday, .Sunday])
-        ]
-    )
-]
-
 // Главный экран
 final class TrackersViewController: UIViewController {
     
@@ -73,9 +56,12 @@ final class TrackersViewController: UIViewController {
         return picker
     }()
     
+    // Список категорий и вложенных в них трекеров
     private var categories: [TrackerCategory] = mockCategories
-    private var completedTrackers: Set<UUID> = [] // Храним ID выполненных трекеров
-    private var currentDate: Date = Date() // Текущая дата
+    // Трекеры, которые были «выполнены» в выбранную дату
+    private var completedTrackers: [UUID: Set<Date>] = [:]
+    // Текущая дата
+    private var currentDate: Date = Date()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -129,7 +115,7 @@ final class TrackersViewController: UIViewController {
             stubLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
-        // Регистрация заголовка секции
+        // Регистрация заголовка категории
         collectionView.register(
             TrackerHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
@@ -150,10 +136,15 @@ final class TrackersViewController: UIViewController {
     }
     
     private func updateStubVisibility() {
-        let isEmpty = categories.isEmpty
+        let isEmpty = getVisibleCategories().isEmpty
         stubImageView.isHidden = !isEmpty
         stubLabel.isHidden = !isEmpty
         collectionView.isHidden = isEmpty
+    }
+    
+    // Подсчет количества выполнений
+    private func completedDays(for trackerId: UUID) -> Int {
+        return completedTrackers[trackerId]?.count ?? 0
     }
     
     @objc private func addTracker() {
@@ -184,32 +175,69 @@ final class TrackersViewController: UIViewController {
         present(habitVC, animated: true)
     }
     
-    // Логика отметки трекера как выполненного
+    // Отметка трекера как выполненного
     private func toggleTrackerCompletion(for trackerId: UUID) {
-        if completedTrackers.contains(trackerId) {
-            completedTrackers.remove(trackerId)
+        let today = Calendar.current.startOfDay(for: currentDate)
+        // нельзя отметить карточку для будущей даты
+        guard today <= Calendar.current.startOfDay(for: Date()) else { return }
+        
+        if completedTrackers[trackerId]?.contains(today) == true {
+            completedTrackers[trackerId]?.remove(today)
+            if completedTrackers[trackerId]?.isEmpty == true {
+                completedTrackers.removeValue(forKey: trackerId)
+            }
         } else {
-            completedTrackers.insert(trackerId)
+            if completedTrackers[trackerId] == nil {
+                completedTrackers[trackerId] = []
+            }
+            completedTrackers[trackerId]?.insert(today)
         }
         collectionView.reloadData()
     }
+    
+    private func getVisibleCategories() -> [TrackerCategory] {
+        let calendar = Calendar.current
+        var weekdayIndex = calendar.component(.weekday, from: currentDate) - 1
+
+        // Сдвиг воскресенья в конец недели
+        if weekdayIndex == 0 {
+            weekdayIndex = 6
+        } else {
+            weekdayIndex -= 1
+        }
+
+        let weekDay = WeekDays.allCases[weekdayIndex]
+
+        let filteredCategories = categories.compactMap { category -> TrackerCategory? in
+            let filteredTrackers = category.trackers.filter { tracker in
+                tracker.schedule.contains(weekDay)
+            }
+            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }
+        return filteredCategories
+    }
+
+
 }
 
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categories.count
+        return getVisibleCategories().count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categories[section].trackers.count
+        return getVisibleCategories()[section].trackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TrackerCell", for: indexPath) as! TrackerCell
-        let tracker = categories[indexPath.section].trackers[indexPath.row]
-        let isCompleted = completedTrackers.contains(tracker.id)
-        cell.configure(with: tracker, isCompleted: isCompleted, daysCount: 5, completionHandler: { [weak self] in
+        let tracker = getVisibleCategories()[indexPath.section].trackers[indexPath.row]
+        
+        let isCompletedToday = completedTrackers[tracker.id]?.contains(Calendar.current.startOfDay(for: currentDate)) ?? false
+        let daysCount = completedDays(for: tracker.id)
+        
+        cell.configure(with: tracker, isCompleted: isCompletedToday, daysCount: daysCount, completionHandler: { [weak self] in
             self?.toggleTrackerCompletion(for: tracker.id)
         })
         return cell
