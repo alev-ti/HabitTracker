@@ -2,26 +2,14 @@ import UIKit
 
 final class ScheduleCreationViewController: UIViewController {
     
-     var completionHandler: (([WeekDays]) -> Void)?
+    var completionHandler: (([WeekDays]) -> Void)?
     
     private lazy var tableView = UITableView()
     private lazy var readyButton = UIButton(type: .system)
-    
-    private lazy var heightCell: CGFloat = {
-        let height = CGFloat(75)
-        let screenHeight = view.bounds.height
-        let navigationBarHeight = navigationController?.navigationBar.frame.height ?? 0
-        let buttonHeight = readyButton.frame.height
-        let availableHeight = screenHeight - navigationBarHeight - buttonHeight - 16 - 24 - 10
-        let potentialCellHeight = availableHeight / 7
-        if potentialCellHeight < height {
-            return CGFloat(potentialCellHeight)
-        }
-        return height
-    }()
+    weak var delegate: ScheduleSelectionDelegate?
     
     let tableViewData = WeekDays.allCases
-    private var selectedDays: [WeekDays] = []
+    var selectedDays: [WeekDays] = []
     
     init(selectedDays: [WeekDays]) {
         self.selectedDays = selectedDays
@@ -34,7 +22,7 @@ final class ScheduleCreationViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureUI()
+        setupUI()
     }
 }
 
@@ -86,13 +74,13 @@ extension ScheduleCreationViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        heightCell
+        75
     }
 }
 
 //MARK: Configure UI
 private extension ScheduleCreationViewController {
-    func configureUI() {
+    func setupUI() {
         view.backgroundColor = .white
         self.title = "Расписание"
         configureReadyButton()
@@ -101,7 +89,7 @@ private extension ScheduleCreationViewController {
     
     func configureReadyButton() {
         readyButton.translatesAutoresizingMaskIntoConstraints = false
-        readyButton.backgroundColor = .lightGray
+        readyButton.backgroundColor = UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
         readyButton.setTitle("Готово", for: .normal)
         readyButton.setTitleColor(.white, for: .normal)
         readyButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
