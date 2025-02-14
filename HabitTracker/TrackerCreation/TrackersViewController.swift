@@ -62,9 +62,12 @@ final class TrackersViewController: UIViewController {
     private var completedTrackers: [UUID: Set<Date>] = [:]
     // Текущая дата
     private var currentDate: Date = Date()
+    private var filteredCategories: [TrackerCategory] = []
+    private var isSearching = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        searchBar.delegate = self
         setupUI()
         setupDatePicker()
         updateStubVisibility()
@@ -97,7 +100,7 @@ final class TrackersViewController: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
-            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
@@ -114,6 +117,7 @@ final class TrackersViewController: UIViewController {
             stubLabel.topAnchor.constraint(equalTo: stubImageView.bottomAnchor, constant: 10),
             stubLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
+
         
         // Регистрация заголовка категории
         collectionView.register(
@@ -133,6 +137,7 @@ final class TrackersViewController: UIViewController {
     @objc private func datePickerValueChanged() {
         currentDate = datePicker.date
         collectionView.reloadData()
+        updateStubVisibility()
     }
     
     private func updateStubVisibility() {
@@ -154,7 +159,7 @@ final class TrackersViewController: UIViewController {
             if trackerType == .habit {
                 self?.showHabitCreationScreen()
             } else {
-                // Реализация для нерегулярного события
+                self?.showIrregularEventCreationScreen()
             }
         }
         present(trackerTypeVC, animated: true)
@@ -169,10 +174,27 @@ final class TrackersViewController: UIViewController {
         habitVC.onCreate = { [weak self] tracker in
             let newCategory = TrackerCategory(title: "Привычки", trackers: [tracker])
             self?.categories.append(newCategory)
-            self?.updateStubVisibility()
             self?.dismiss(animated: true)
+            self?.collectionView.reloadData()
+            self?.updateStubVisibility()
         }
         present(habitVC, animated: true)
+    }
+    
+    private func showIrregularEventCreationScreen() {
+        let irregularEventVC = IrregularEventCreationViewController()
+        irregularEventVC.modalPresentationStyle = .pageSheet
+        irregularEventVC.onCancel = { [weak self] in
+            self?.dismiss(animated: true)
+        }
+        irregularEventVC.onCreate = { [weak self] trackerCategory in
+            let newCategory = TrackerCategory(title: trackerCategory.title, trackers: trackerCategory.trackers)
+            self?.categories.append(newCategory)
+            self?.dismiss(animated: true)
+            self?.collectionView.reloadData()
+            self?.updateStubVisibility()
+        }
+        present(irregularEventVC, animated: true)
     }
     
     // Отметка трекера как выполненного
@@ -196,10 +218,13 @@ final class TrackersViewController: UIViewController {
     }
     
     private func getVisibleCategories() -> [TrackerCategory] {
+        if isSearching {
+            return filteredCategories
+        }
+        
         let calendar = Calendar.current
         var weekdayIndex = calendar.component(.weekday, from: currentDate) - 1
 
-        // Сдвиг воскресенья в конец недели
         if weekdayIndex == 0 {
             weekdayIndex = 6
         } else {
@@ -208,15 +233,13 @@ final class TrackersViewController: UIViewController {
 
         let weekDay = WeekDays.allCases[weekdayIndex]
 
-        let filteredCategories = categories.compactMap { category -> TrackerCategory? in
+        return categories.compactMap { category -> TrackerCategory? in
             let filteredTrackers = category.trackers.filter { tracker in
                 tracker.schedule.contains(weekDay)
             }
             return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
         }
-        return filteredCategories
     }
-
 
 }
 
@@ -258,3 +281,32 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
         return CGSize(width: collectionView.bounds.width, height: 40)
     }
 }
+
+extension TrackersViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            isSearching = false
+            filteredCategories = []
+        } else {
+            isSearching = true
+            filteredCategories = categories.compactMap { category in
+                let filteredTrackers = category.trackers.filter { tracker in
+                    tracker.name.lowercased().contains(searchText.lowercased())
+                }
+                return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+            }
+        }
+        collectionView.reloadData()
+        updateStubVisibility()
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        isSearching = false
+        filteredCategories = []
+        searchBar.resignFirstResponder()
+        collectionView.reloadData()
+        updateStubVisibility()
+    }
+}
+
