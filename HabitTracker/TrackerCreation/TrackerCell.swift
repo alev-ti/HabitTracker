@@ -28,7 +28,7 @@ final class TrackerCell: UICollectionViewCell {
     
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
+        label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .white
         label.numberOfLines = 2
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -90,11 +90,10 @@ final class TrackerCell: UICollectionViewCell {
             emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
 
-            // Отступ сверху от emojiBackgroundView до nameLabel
             nameLabel.topAnchor.constraint(equalTo: emojiBackgroundView.bottomAnchor, constant: 8),
             nameLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
             nameLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
-            nameLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -12),
+            nameLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
             
             completionButton.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 8),
             completionButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
@@ -111,7 +110,6 @@ final class TrackerCell: UICollectionViewCell {
 
         completionButton.addTarget(self, action: #selector(completionButtonTapped), for: .touchUpInside)
     }
-
 
     
     func configure(with tracker: Tracker, isCompleted: Bool, daysCount: Int, completionHandler: @escaping () -> Void) {

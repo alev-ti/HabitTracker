@@ -58,12 +58,12 @@ final class TrackerTypeViewController: UIViewController {
             habitButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20), // Отступ слева
             habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20), // Отступ справа
-            habitButton.heightAnchor.constraint(equalToConstant: 50), // Высота кнопки
+            habitButton.heightAnchor.constraint(equalToConstant: 60), // Высота кнопки
             
             irregularEventButton.topAnchor.constraint(equalTo: habitButton.bottomAnchor, constant: 16), // Расстояние между кнопками
             irregularEventButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20), // Отступ слева
             irregularEventButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20), // Отступ справа
-            irregularEventButton.heightAnchor.constraint(equalToConstant: 50) // Высота кнопки
+            irregularEventButton.heightAnchor.constraint(equalToConstant: 60) // Высота кнопки
         ])
         
         habitButton.addTarget(self, action: #selector(habitButtonTapped), for: .touchUpInside)
