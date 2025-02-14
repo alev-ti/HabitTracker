@@ -1,18 +1,14 @@
 import UIKit
 
-protocol ScheduleSelectionDelegate: AnyObject {
-    func didSelectSchedule(days: [WeekDays])
-}
-
-// Экран создания привычки
-final class HabitCreationViewController: UIViewController {
+// Экран создания нерегулярного события
+final class IrregularEventCreationViewController: UIViewController {
     
     var onCancel: (() -> Void)?
-    var onCreate: ((Tracker) -> Void)?
+    var onCreate: ((TrackerCategory) -> Void)?
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Новая привычка"
+        label.text = "Новое нерегулярное событие"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -64,40 +60,20 @@ final class HabitCreationViewController: UIViewController {
         return button
     }()
     
-    private let scheduleLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 16)
-        label.textColor = .gray
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let tableData = ["Категория", "Расписание"]
-    
-    var selectedDays: [WeekDays] = [] {
-        didSet {
-            updateScheduleLabel()
-            validateForm()
-        }
-    }
+    private let tableData = ["Категория"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.hideKeyboardWhenTapped()
         setupUI()
+        self.hideKeyboardWhenTapped()
     }
     
     private func validateForm() {
-        let isValid = !nameTextField.text!.isEmpty && !selectedDays.isEmpty
+        let isValid = !nameTextField.text!.isEmpty
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid
             ? UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
             : UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1)
-    }
-    
-    private func updateScheduleLabel() {
-        scheduleLabel.text = selectedDays.isEmpty ? nil : selectedDays.map { $0.getShortName() }.joined(separator: ", ")
-        tableView.reloadData()
     }
     
     private func setupUI() {
@@ -108,7 +84,6 @@ final class HabitCreationViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(cancelButton)
         view.addSubview(createButton)
-        view.addSubview(scheduleLabel)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
@@ -122,7 +97,7 @@ final class HabitCreationViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: 150), // 2 строки по 75
+            tableView.heightAnchor.constraint(equalToConstant: 75),
             
             cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
@@ -155,13 +130,13 @@ final class HabitCreationViewController: UIViewController {
     
     @objc private func createButtonTapped() {
         guard let name = nameTextField.text, !name.isEmpty else { return }
-        let tracker = Tracker(id: UUID(), name: name, color: .brown, emoji: "😊", schedule: selectedDays)
+        let tracker = TrackerCategory(title: "Категория для нерегулярных событий", trackers: [Tracker(id: UUID(), name: name, color: .systemPink, emoji: "😼", schedule: [])])
         onCreate?(tracker)
     }
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
-extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSource {
+extension IrregularEventCreationViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tableData.count
     }
@@ -171,37 +146,9 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         cell.textLabel?.text = tableData[indexPath.row]
         cell.accessoryType = .disclosureIndicator // Шеврон вправо
         cell.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
-        
-        if indexPath.row == 1 {
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
-            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            
-            let stackView = UIStackView()
-            stackView.axis = .vertical
-            stackView.spacing = 4
-            stackView.translatesAutoresizingMaskIntoConstraints = false
-            
-            cell.textLabel?.text = nil
-            let titleLabel = UILabel()
-            titleLabel.text = "Расписание"
-            titleLabel.font = UIFont.systemFont(ofSize: 16)
-            titleLabel.textColor = .black
-            
-            stackView.addArrangedSubview(titleLabel)
-            
-            if !selectedDays.isEmpty {
-                scheduleLabel.text = selectedDays.map { $0.getShortName() }.joined(separator: ", ")
-                stackView.addArrangedSubview(scheduleLabel)
-            }
-            
-            cell.contentView.addSubview(stackView)
-            
-            NSLayoutConstraint.activate([
-                stackView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
-                stackView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -32),
-                stackView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-            ])
-        }
+        cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
+        cell.layer.cornerRadius = 16
+        cell.layer.masksToBounds = true
         return cell
     }
     
@@ -216,30 +163,9 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         case 0:
             // Переход на экран выбора категории
             print("Выбрана категория")
-        case 1:
-                let scheduleScreenViewController = ScheduleCreationViewController(selectedDays: [])
-            scheduleScreenViewController.completionHandler = { [weak self] data in
-                self?.selectedDays = data
-                self?.tableView.reloadData()
-            }
-            
-            let navigationController = UINavigationController(rootViewController: scheduleScreenViewController)
-            
-            let textAttributes: [NSAttributedString.Key: Any] = [
-                .foregroundColor: UIColor.black,
-                .font: UIFont.systemFont(ofSize: 16, weight: .medium)
-            ]
-            navigationController.navigationBar.titleTextAttributes = textAttributes
-            present(navigationController, animated: true)
         default:
             break
         }
-    }
-}
-
-extension HabitCreationViewController: ScheduleSelectionDelegate {
-    func didSelectSchedule(days: [WeekDays]) {
-        self.selectedDays = days
     }
 }
 
