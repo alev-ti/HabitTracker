@@ -3,7 +3,7 @@ import UIKit
 final class ScheduleTableViewCell: UITableViewCell {
     static let reuseIdentifier = "ScheduleTableViewCellReuseIdentifier"
     private lazy var nameLabel = UILabel()
-    lazy var toggle = UISwitch()
+    private lazy var toggle = UISwitch()
     private lazy var stackView = UIStackView()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -18,18 +18,31 @@ final class ScheduleTableViewCell: UITableViewCell {
     func configureCell(nameLabel: String) {
         self.nameLabel.text = nameLabel
     }
+    
+    func toggleOn() {
+        toggle.isOn = true
+    }
+    
+    func configureToggle(target: Any?, action: Selector, tag: Int) {
+        toggle.addTarget(target, action: action, for: .valueChanged)
+        toggle.tag = tag
+    }
+    
+    func isToggleOn() -> Bool {
+        return toggle.isOn
+    }
 }
 
 //MARK: Configure UI
 private extension ScheduleTableViewCell {
     func configureUI() {
         configureNameLabelAndToggle()
-        self.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        self.backgroundColor = Color.lightGray
     }
     
     func configureNameLabelAndToggle() {
         toggle.translatesAutoresizingMaskIntoConstraints = false
-        toggle.onTintColor = UIColor(red: 55/255, green: 114/255, blue: 231/255, alpha: 1)
+        toggle.onTintColor = Color.blue
         
         
         nameLabel.translatesAutoresizingMaskIntoConstraints = false

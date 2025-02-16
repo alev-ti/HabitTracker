@@ -3,7 +3,7 @@ import UIKit
 
 final class TrackerHeaderView: UICollectionReusableView {
     
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 19)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -26,5 +26,9 @@ final class TrackerHeaderView: UICollectionReusableView {
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
         ])
+    }
+    
+    func changeTitleLabel(with text: String) {
+        titleLabel.text = text
     }
 }

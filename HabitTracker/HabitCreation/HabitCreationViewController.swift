@@ -10,7 +10,7 @@ final class HabitCreationViewController: UIViewController {
     var onCancel: (() -> Void)?
     var onCreate: ((Tracker) -> Void)?
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Новая привычка"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -18,10 +18,10 @@ final class HabitCreationViewController: UIViewController {
         return label
     }()
     
-    private let nameTextField: UITextField = {
+    private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
-        textField.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        textField.backgroundColor = Color.lightGray
         textField.layer.cornerRadius = 16
         textField.font = UIFont.systemFont(ofSize: 16)
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -30,7 +30,7 @@ final class HabitCreationViewController: UIViewController {
         return textField
     }()
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.isScrollEnabled = false
         tableView.layer.cornerRadius = 16
@@ -40,11 +40,11 @@ final class HabitCreationViewController: UIViewController {
         return tableView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
-        button.setTitleColor(UIColor(red: 245/255, green: 107/255, blue: 108/255, alpha: 1), for: .normal)
-        button.layer.borderColor = UIColor(red: 245/255, green: 107/255, blue: 108/255, alpha: 1).cgColor
+        button.setTitleColor(Color.lightRed, for: .normal)
+        button.layer.borderColor = Color.lightRed.cgColor
         button.layer.borderWidth = 1
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -52,10 +52,10 @@ final class HabitCreationViewController: UIViewController {
         return button
     }()
     
-    private let createButton: UIButton = {
+    private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
-        button.backgroundColor = UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1)
+        button.backgroundColor = Color.gray
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -64,7 +64,7 @@ final class HabitCreationViewController: UIViewController {
         return button
     }()
     
-    private let scheduleLabel: UILabel = {
+    private lazy var scheduleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = .gray
@@ -91,8 +91,8 @@ final class HabitCreationViewController: UIViewController {
         let isValid = !nameTextField.text!.isEmpty && !selectedDays.isEmpty
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid
-            ? UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
-            : UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1)
+            ? Color.lightBlack
+            : Color.gray
     }
     
     private func updateScheduleLabel() {
@@ -170,7 +170,7 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = tableData[indexPath.row]
         cell.accessoryType = .disclosureIndicator // Шеврон вправо
-        cell.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        cell.backgroundColor = Color.lightGray
         
         if indexPath.row == 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)

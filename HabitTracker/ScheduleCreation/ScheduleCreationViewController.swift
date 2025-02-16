@@ -8,8 +8,8 @@ final class ScheduleCreationViewController: UIViewController {
     private lazy var readyButton = UIButton(type: .system)
     weak var delegate: ScheduleSelectionDelegate?
     
-    let tableViewData = WeekDays.allCases
-    var selectedDays: [WeekDays] = []
+    private let tableViewData = WeekDays.allCases
+    private var selectedDays: [WeekDays] = []
     
     init(selectedDays: [WeekDays]) {
         self.selectedDays = selectedDays
@@ -37,10 +37,9 @@ extension ScheduleCreationViewController: UITableViewDataSource {
         guard let scheduleTableViewCell = cell as? ScheduleTableViewCell else {return UITableViewCell()}
         scheduleTableViewCell.configureCell(nameLabel: tableViewData[indexPath.row].rawValue)
         if selectedDays.contains(tableViewData[indexPath.row]) {
-            scheduleTableViewCell.toggle.isOn = true
+            scheduleTableViewCell.toggleOn()
         }
-        scheduleTableViewCell.toggle.addTarget(self, action: #selector(toggleSwitchChanged), for: .valueChanged)
-        scheduleTableViewCell.toggle.tag = indexPath.row
+        scheduleTableViewCell.configureToggle(target: self, action: #selector(toggleSwitchChanged), tag: indexPath.row)
         return scheduleTableViewCell
     }
     
@@ -80,16 +79,16 @@ extension ScheduleCreationViewController: UITableViewDelegate {
 
 //MARK: Configure UI
 private extension ScheduleCreationViewController {
-    func setupUI() {
+    private func setupUI() {
         view.backgroundColor = .white
         self.title = "Расписание"
         configureReadyButton()
         configureTableView()
     }
     
-    func configureReadyButton() {
+    private func configureReadyButton() {
         readyButton.translatesAutoresizingMaskIntoConstraints = false
-        readyButton.backgroundColor = UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
+        readyButton.backgroundColor = Color.lightBlack
         readyButton.setTitle("Готово", for: .normal)
         readyButton.setTitleColor(.white, for: .normal)
         readyButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
@@ -112,7 +111,7 @@ private extension ScheduleCreationViewController {
         dismiss(animated: true, completion: nil)
     }
     
-    func configureTableView() {
+    private func configureTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(ScheduleTableViewCell.self, forCellReuseIdentifier: ScheduleTableViewCell.reuseIdentifier)
         tableView.delegate = self

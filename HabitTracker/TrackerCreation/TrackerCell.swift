@@ -2,14 +2,14 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
     
-    private let cardView: UIView = {
+    private lazy var cardView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
-    private let emojiLabel: UILabel = {
+    private lazy var emojiLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
@@ -17,7 +17,7 @@ final class TrackerCell: UICollectionViewCell {
         return label
     }()
     
-    private let emojiBackgroundView: UIView = {
+    private lazy var emojiBackgroundView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.white.withAlphaComponent(0.4)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -26,7 +26,7 @@ final class TrackerCell: UICollectionViewCell {
         return view
     }()
     
-    private let nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .white
@@ -35,7 +35,7 @@ final class TrackerCell: UICollectionViewCell {
         return label
     }()
     
-    private let completionButton: UIButton = {
+    private lazy var completionButton: UIButton = {
         let button = UIButton()
         button.layer.cornerRadius = 16
         button.backgroundColor = .white
@@ -45,7 +45,7 @@ final class TrackerCell: UICollectionViewCell {
         return button
     }()
     
-    private let daysCountLabel: UILabel = {
+    private lazy var daysCountLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .black
@@ -122,7 +122,12 @@ final class TrackerCell: UICollectionViewCell {
         completionButton.setImage(image, for: .normal)
         completionButton.backgroundColor = isCompleted ? tracker.color.withAlphaComponent(0.4) : tracker.color
         
-        daysCountLabel.text = "\(daysCount) \(dayString(for: daysCount))"
+        let isIrregularEvent = tracker.schedule.isEmpty
+        if isIrregularEvent {
+            daysCountLabel.text = isCompleted ? "Выполнено" : "Не выполнено"
+        } else {
+            daysCountLabel.text = "\(daysCount) \(dayString(for: daysCount))"
+        }
     }
     
     private func dayString(for count: Int) -> String {
