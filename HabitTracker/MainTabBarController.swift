@@ -15,7 +15,7 @@ final class MainTabBarController: UITabBarController {
         statsVC.tabBarItem = UITabBarItem(title: "Статистика", image: UIImage(systemName: "hare.fill"), tag: 1)
         
         tabBar.layer.borderWidth = 0.5
-        tabBar.layer.borderColor = UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1).cgColor
+        tabBar.layer.borderColor = Color.gray.cgColor
         tabBar.clipsToBounds = true
         
         viewControllers = [trackersVC, statsVC]

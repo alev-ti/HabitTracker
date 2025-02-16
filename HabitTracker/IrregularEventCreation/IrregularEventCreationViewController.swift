@@ -6,7 +6,7 @@ final class IrregularEventCreationViewController: UIViewController {
     var onCancel: (() -> Void)?
     var onCreate: ((TrackerCategory) -> Void)?
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Новое нерегулярное событие"
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -14,10 +14,10 @@ final class IrregularEventCreationViewController: UIViewController {
         return label
     }()
     
-    private let nameTextField: UITextField = {
+    private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
-        textField.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        textField.backgroundColor = Color.lightGray
         textField.layer.cornerRadius = 16
         textField.font = UIFont.systemFont(ofSize: 16)
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -26,7 +26,7 @@ final class IrregularEventCreationViewController: UIViewController {
         return textField
     }()
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.isScrollEnabled = false
         tableView.layer.cornerRadius = 16
@@ -36,11 +36,11 @@ final class IrregularEventCreationViewController: UIViewController {
         return tableView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
-        button.setTitleColor(UIColor(red: 245/255, green: 107/255, blue: 108/255, alpha: 1), for: .normal)
-        button.layer.borderColor = UIColor(red: 245/255, green: 107/255, blue: 108/255, alpha: 1).cgColor
+        button.setTitleColor(Color.lightRed, for: .normal)
+        button.layer.borderColor = Color.lightRed.cgColor
         button.layer.borderWidth = 1
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -48,10 +48,10 @@ final class IrregularEventCreationViewController: UIViewController {
         return button
     }()
     
-    private let createButton: UIButton = {
+    private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
-        button.backgroundColor = UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1)
+        button.backgroundColor = Color.gray
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -72,8 +72,8 @@ final class IrregularEventCreationViewController: UIViewController {
         let isValid = !nameTextField.text!.isEmpty
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid
-            ? UIColor(red: 26/255, green: 27/255, blue: 34/255, alpha: 1)
-            : UIColor(red: 174/255, green: 175/255, blue: 180/255, alpha: 1)
+            ? Color.lightBlack
+            : Color.gray
     }
     
     private func setupUI() {
@@ -130,8 +130,26 @@ final class IrregularEventCreationViewController: UIViewController {
     
     @objc private func createButtonTapped() {
         guard let name = nameTextField.text, !name.isEmpty else { return }
-        let tracker = TrackerCategory(title: "Категория для нерегулярных событий", trackers: [Tracker(id: UUID(), name: name, color: .systemPink, emoji: "😼", schedule: [])])
-        onCreate?(tracker)
+        let tracker = Tracker(id: UUID(), name: name, color: .systemPink, emoji: "😼", schedule: [])
+        let today = Calendar.current.startOfDay(for: Date())
+        let record = TrackerRecord(id: tracker.id, date: today)
+
+        
+        if let trackersVC = presentingViewController as? TrackersViewController {
+            if let index = trackersVC.categories.firstIndex(where: { $0.title == "Категория нерегулярных событий" }) {
+                let updatedCategory = trackersVC.categories[index]
+                let updatedTrackers = updatedCategory.trackers + [tracker]
+                trackersVC.categories[index] = TrackerCategory(title: updatedCategory.title, trackers: updatedTrackers)
+            } else {
+                let newCategory = TrackerCategory(title: "Категория нерегулярных событий", trackers: [tracker])
+                trackersVC.categories.append(newCategory)
+            }
+            
+            trackersVC.completedTrackers.insert(record)
+            trackersVC.reloadData()
+        }
+        
+        onCreate?(TrackerCategory(title: "Категория нерегулярных событий", trackers: [tracker]))
     }
 }
 
@@ -145,7 +163,7 @@ extension IrregularEventCreationViewController: UITableViewDelegate, UITableView
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = tableData[indexPath.row]
         cell.accessoryType = .disclosureIndicator // Шеврон вправо
-        cell.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        cell.backgroundColor = Color.lightGray
         cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
         cell.layer.cornerRadius = 16
         cell.layer.masksToBounds = true
