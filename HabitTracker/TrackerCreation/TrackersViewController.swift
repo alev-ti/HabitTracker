@@ -45,6 +45,7 @@ final class TrackersViewController: UIViewController {
         collectionView.register(TrackerCell.self, forCellWithReuseIdentifier: "TrackerCell")
         collectionView.backgroundColor = .clear
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -2)
         return collectionView
     }()
     
@@ -97,7 +98,7 @@ final class TrackersViewController: UIViewController {
         
         // Констрейнты
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
             searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
@@ -117,7 +118,6 @@ final class TrackersViewController: UIViewController {
             stubLabel.topAnchor.constraint(equalTo: stubImageView.bottomAnchor, constant: 10),
             stubLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
-
         
         // Регистрация заголовка категории
         collectionView.register(
