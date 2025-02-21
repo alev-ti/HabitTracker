@@ -77,7 +77,7 @@ extension ScheduleCreationViewController: UITableViewDelegate {
     }
 }
 
-//MARK: Configure UI
+
 private extension ScheduleCreationViewController {
     private func setupUI() {
         view.backgroundColor = .white

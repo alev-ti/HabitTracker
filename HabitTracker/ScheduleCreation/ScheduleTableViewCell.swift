@@ -33,7 +33,7 @@ final class ScheduleTableViewCell: UITableViewCell {
     }
 }
 
-//MARK: Configure UI
+
 private extension ScheduleTableViewCell {
     func configureUI() {
         configureNameLabelAndToggle()
