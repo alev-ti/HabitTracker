@@ -19,5 +19,18 @@ extension UIColor {
 
         self.init(red: red, green: green, blue: blue, alpha: 1.0)
     }
+    
+    var hexString: String {
+        let components = self.cgColor.components ?? [0, 0, 0, 1]
+        let red = components[0]
+        let green = components[1]
+        let blue = components[2]
+        let alpha = components[3]
+        
+        let rgb = (Int)(red * 255.0) << 16 | (Int)(green * 255.0) << 8 | (Int)(blue * 255.0)
+        let alphaInt = Int(alpha * 255.0)
+        
+        return String(format: "#%06X%02X", rgb, alphaInt)
+    }
 }
 
