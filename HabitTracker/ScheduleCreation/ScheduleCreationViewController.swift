@@ -34,7 +34,7 @@ extension ScheduleCreationViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ScheduleTableViewCell.reuseIdentifier, for: indexPath)
         
-        guard let scheduleTableViewCell = cell as? ScheduleTableViewCell else {return UITableViewCell()}
+        guard let scheduleTableViewCell = cell as? ScheduleTableViewCell else { return UITableViewCell() }
         scheduleTableViewCell.configureCell(nameLabel: tableViewData[indexPath.row].rawValue)
         if selectedDays.contains(tableViewData[indexPath.row]) {
             scheduleTableViewCell.toggleOn()
