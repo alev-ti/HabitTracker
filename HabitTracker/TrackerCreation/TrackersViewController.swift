@@ -57,17 +57,22 @@ final class TrackersViewController: UIViewController {
         return picker
     }()
     
-    // Список категорий и вложенных в них трекеров
-    var categories: [TrackerCategory] = mockCategories
-    // Трекеры, которые были «выполнены» в выбранную дату
+    var categories: [TrackerCategory] = []
     var completedTrackers: Set<TrackerRecord> = []
-    // Текущая дата
     private var currentDate: Date = Date()
     private var filteredCategories: [TrackerCategory] = []
     private var isSearching = false
+    private lazy var dataProvider: DataProviderProtocol = {
+        return DataProvider(delegate: self)
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let trackerCategories = dataProvider.getAllTrackerCategory()
+
+        self.completedTrackers = Set(dataProvider.getAllRecords())
+        
+        self.categories = trackerCategories ?? []
         searchBar.delegate = self
         setupUI()
         setupDatePicker()
@@ -171,9 +176,8 @@ final class TrackersViewController: UIViewController {
             self?.dismiss(animated: true)
         }
         habitVC.onCreate = { [weak self] tracker in
-            let newCategory = TrackerCategory(title: "Привычки", trackers: [tracker])
-            self?.categories.append(newCategory)
             self?.dismiss(animated: true)
+            self?.dataProvider.addTracker(categoryHeader: "Привычки", tracker: tracker)
             self?.collectionView.reloadData()
             self?.updateStubVisibility()
         }
@@ -187,29 +191,34 @@ final class TrackersViewController: UIViewController {
             self?.dismiss(animated: true)
         }
         irregularEventVC.onCreate = { [weak self] trackerCategory in
-            let newCategory = TrackerCategory(title: trackerCategory.title, trackers: trackerCategory.trackers)
-            self?.categories.append(newCategory)
             self?.dismiss(animated: true)
+            self?.dataProvider.addTrackerCategory(categoryHeader: trackerCategory.title)
+            trackerCategory.trackers.forEach { tracker in
+                self?.dataProvider.addTracker(categoryHeader: trackerCategory.title, tracker: tracker)
+            }
             self?.collectionView.reloadData()
             self?.updateStubVisibility()
         }
         present(irregularEventVC, animated: true)
     }
     
-    private func toggleTrackerCompletion(for trackerId: UUID) {
+    private func toggleTrackerCompletion(for tracker: Tracker) {
         let today = Calendar.current.startOfDay(for: currentDate)
         let now = Calendar.current.startOfDay(for: Date())
 
         guard today <= now else { return }
         
-        let record = TrackerRecord(id: trackerId, date: today)
+        let record = TrackerRecord(id: tracker.id, date: today)
         
-        if let existingRecord = completedTrackers.first(where: { $0.id == trackerId && Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+        if let existingRecord = completedTrackers.first(where: { $0.id == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: today) }) {
             completedTrackers.remove(existingRecord)
-            reloadData()
         } else {
-            completedTrackers.insert(record)
-            collectionView.reloadData()
+            do {
+                try dataProvider.addNewRecord(tracker: tracker, trackerRecord: record)
+                completedTrackers.insert(record)
+            } catch {
+                print("failed to add new record")
+            }
         }
         collectionView.reloadData()
     }
@@ -267,7 +276,7 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
         let daysCount = completedDays(for: tracker.id)
         
         cell.configure(with: tracker, isCompleted: isCompletedToday, daysCount: daysCount, completionHandler: { [weak self] in
-            self?.toggleTrackerCompletion(for: tracker.id)
+            self?.toggleTrackerCompletion(for: tracker)
         })
         return cell
     }
@@ -313,5 +322,12 @@ extension TrackersViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
         collectionView.reloadData()
         updateStubVisibility()
+    }
+}
+
+extension TrackersViewController: DataProviderDelegate {
+    func didUpdate() {
+        let trackerCategories = dataProvider.getAllTrackerCategory()
+        self.categories = trackerCategories ?? []
     }
 }

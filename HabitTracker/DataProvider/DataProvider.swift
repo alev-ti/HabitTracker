@@ -34,11 +34,31 @@ final class DataProvider: NSObject {
     private weak var delegate: DataProviderDelegate?
     private let context: NSManagedObjectContext
     
-    init(delegate: DataProviderDelegate) throws {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-              let context = appDelegate.persistentContainer?.viewContext else { throw DataProviderError.failedToInitializeContext }
-        self.context = context
+    var persistentContainer: NSPersistentContainer!
+    
+    init(delegate: DataProviderDelegate) {
+        let container = NSPersistentContainer(name: "HabitTracker")
+        container.loadPersistentStores { storeDescription, error in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        }
+        self.persistentContainer = container
+        self.context = persistentContainer.viewContext
         self.delegate = delegate
+    }
+    
+    func saveContext() {
+        let context = persistentContainer.viewContext
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                context.rollback()
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
     }
 }
 
@@ -46,7 +66,11 @@ final class DataProvider: NSObject {
 extension DataProvider: DataProviderProtocol {
     func addNewRecord(tracker: Tracker, trackerRecord: TrackerRecord) throws {
         if let trackerCoreDataIsExist = trackerStore.getTrackerCoreDataForId(id: tracker.id) {
-            try? trackerRecordStore.addNewRecord(trackerCoreData: trackerCoreDataIsExist, trackerRecord: trackerRecord)
+            do {
+                try trackerRecordStore.addNewRecord(trackerCoreData: trackerCoreDataIsExist, trackerRecord: trackerRecord)
+            } catch {
+                print("failed to addNewRecord")
+            }
         }
     }
     
@@ -88,7 +112,7 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func getAllTrackerCategory() -> [TrackerCategory]? {
-        guard let trackerCategoryStore else {return nil}
+        guard let trackerCategoryStore else { return nil }
         return trackerCategoryStore.getAllTrackerCategory()
     }
 }
