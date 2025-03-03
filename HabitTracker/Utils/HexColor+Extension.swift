@@ -25,12 +25,10 @@ extension UIColor {
         let red = components[0]
         let green = components[1]
         let blue = components[2]
-        let alpha = components[3]
         
         let rgb = (Int)(red * 255.0) << 16 | (Int)(green * 255.0) << 8 | (Int)(blue * 255.0)
-        let alphaInt = Int(alpha * 255.0)
         
-        return String(format: "#%06X%02X", rgb, alphaInt)
+        return String(format: "#%06X%0", rgb)
     }
 }
 
