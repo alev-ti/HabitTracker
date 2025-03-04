@@ -13,7 +13,8 @@ final class ColorCell: UICollectionViewCell {
     override func prepareForReuse() {}
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        return nil
     }
     
     func configureCell(_ color: UIColor) {
