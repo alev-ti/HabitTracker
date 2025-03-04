@@ -17,21 +17,21 @@ final class ColorCell: UICollectionViewCell {
     }
     
     func configureCell(_ color: UIColor) {
-        self.colorView.backgroundColor = color
+        colorView.backgroundColor = color
         
     }
     
     func selectCell(select: Bool) {
-        self.layer.borderColor = select ? self.colorView.backgroundColor?.withAlphaComponent(0.5).cgColor : UIColor.clear.cgColor
-        self.layer.borderWidth = select ? 3 : 0
+        layer.borderColor = select ? colorView.backgroundColor?.withAlphaComponent(0.5).cgColor : UIColor.clear.cgColor
+        layer.borderWidth = select ? 3 : 0
     }
 }
 
 
 private extension ColorCell {
     func setupUI() {
-        self.layer.masksToBounds = true
-        self.layer.cornerRadius = 8
+        layer.masksToBounds = true
+        layer.cornerRadius = 8
         configureColorView()
     }
     

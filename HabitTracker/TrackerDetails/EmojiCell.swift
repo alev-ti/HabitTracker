@@ -17,20 +17,20 @@ final class EmojiCell: UICollectionViewCell {
     }
     
     func configureCell(emoji: String) {
-        self.emojiLabel.text = emoji
+        emojiLabel.text = emoji
         
     }
     
     func selectCell(select: Bool) {
-        self.backgroundColor = select ? Color.lightGray : .clear
+        backgroundColor = select ? Color.lightGray : .clear
     }
 }
 
 
 private extension EmojiCell {
     func setupUI() {
-        self.layer.masksToBounds = true
-        self.layer.cornerRadius = 16
+        layer.masksToBounds = true
+        layer.cornerRadius = 16
         configureEmoji()
     }
     
