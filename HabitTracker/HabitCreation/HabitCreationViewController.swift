@@ -214,7 +214,7 @@ final class HabitCreationViewController: UIViewController {
 
 extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableData.count
+        tableData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -296,7 +296,7 @@ extension HabitCreationViewController: ScheduleSelectionDelegate {
 
 extension HabitCreationViewController: UICollectionViewDelegate,UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackerDetailCollectionViewData.count
+        trackerDetailCollectionViewData.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

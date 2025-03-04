@@ -203,7 +203,7 @@ final class IrregularEventCreationViewController: UIViewController {
 
 extension IrregularEventCreationViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableData.count
+        tableData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -236,7 +236,7 @@ extension IrregularEventCreationViewController: UITableViewDelegate, UITableView
 
 extension IrregularEventCreationViewController: UICollectionViewDelegate,UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return trackerDetailCollectionViewData.count
+        trackerDetailCollectionViewData.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

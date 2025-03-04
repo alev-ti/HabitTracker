@@ -3,11 +3,11 @@ import Foundation
 
 class ScheduleValueTransformer: ValueTransformer {
     override class func allowsReverseTransformation() -> Bool {
-        return true
+        true
     }
     
     override class func transformedValueClass() -> AnyClass {
-        return NSData.self
+        NSData.self
     }
     
     override func transformedValue(_ value: Any?) -> Any? {

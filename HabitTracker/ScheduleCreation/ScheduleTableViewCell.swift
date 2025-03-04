@@ -29,7 +29,7 @@ final class ScheduleTableViewCell: UITableViewCell {
     }
     
     func isToggleOn() -> Bool {
-        return toggle.isOn
+        toggle.isOn
     }
 }
 

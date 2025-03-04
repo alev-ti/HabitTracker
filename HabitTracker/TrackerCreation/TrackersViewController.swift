@@ -63,7 +63,7 @@ final class TrackersViewController: UIViewController {
     private var filteredCategories: [TrackerCategory] = []
     private var isSearching = false
     private lazy var dataProvider: DataProviderProtocol = {
-        return DataProvider(delegate: self)
+        DataProvider(delegate: self)
     }()
     
     override func viewDidLoad() {
@@ -153,7 +153,7 @@ final class TrackersViewController: UIViewController {
     }
 
     private func completedDays(for trackerId: UUID) -> Int {
-        return completedTrackers.filter { $0.id == trackerId }.count
+        completedTrackers.filter { $0.id == trackerId }.count
     }
     
     @objc private func addTracker() {
@@ -260,11 +260,11 @@ final class TrackersViewController: UIViewController {
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return getVisibleCategories().count
+        getVisibleCategories().count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return getVisibleCategories()[section].trackers.count
+        getVisibleCategories()[section].trackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -293,7 +293,7 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: 40)
+        CGSize(width: collectionView.bounds.width, height: 40)
     }
 }
 
