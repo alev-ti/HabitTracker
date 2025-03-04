@@ -11,7 +11,7 @@ class ScheduleValueTransformer: ValueTransformer {
     }
     
     override func transformedValue(_ value: Any?) -> Any? {
-        guard let customClass = value as? [WeekDays] else { return nil }
+        guard let customClass = value as? [WeekDay] else { return nil }
         let encoder = JSONEncoder()
         return try? encoder.encode(customClass)
     }
@@ -19,7 +19,7 @@ class ScheduleValueTransformer: ValueTransformer {
     override func reverseTransformedValue(_ value: Any?) -> Any? {
         guard let data = value as? Data else { return nil }
         let decoder = JSONDecoder()
-        return try? decoder.decode([WeekDays].self, from: data)
+        return try? decoder.decode([WeekDay].self, from: data)
     }
 }
 

@@ -235,7 +235,7 @@ final class TrackersViewController: UIViewController {
         dateFormatter.dateFormat = "EEEE"
         let weekdayName = dateFormatter.string(from: today)
 
-        guard let weekDay = WeekDays(from: weekdayName) else {
+        guard let weekDay = WeekDay(from: weekdayName) else {
             return categories
         }
 

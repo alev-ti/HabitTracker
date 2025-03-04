@@ -1,7 +1,7 @@
 import UIKit
 
 protocol ScheduleSelectionDelegate: AnyObject {
-    func didSelectSchedule(days: [WeekDays])
+    func didSelectSchedule(days: [WeekDay])
 }
 
 // Экран создания привычки
@@ -98,7 +98,7 @@ final class HabitCreationViewController: UIViewController {
         return collectionView
     }()
     
-    var selectedDays: [WeekDays] = [] {
+    var selectedDays: [WeekDay] = [] {
         didSet {
             updateScheduleLabel()
             validateForm()
@@ -289,7 +289,7 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
 }
 
 extension HabitCreationViewController: ScheduleSelectionDelegate {
-    func didSelectSchedule(days: [WeekDays]) {
+    func didSelectSchedule(days: [WeekDay]) {
         self.selectedDays = days
     }
 }

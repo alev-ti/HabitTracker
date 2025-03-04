@@ -2,16 +2,16 @@ import UIKit
 
 final class ScheduleCreationViewController: UIViewController {
     
-    var completionHandler: (([WeekDays]) -> Void)?
+    var completionHandler: (([WeekDay]) -> Void)?
     
     private lazy var tableView = UITableView()
     private lazy var readyButton = UIButton(type: .system)
     weak var delegate: ScheduleSelectionDelegate?
     
-    private let tableViewData = WeekDays.allCases
-    private var selectedDays: [WeekDays] = []
+    private let tableViewData = WeekDay.allCases
+    private var selectedDays: [WeekDay] = []
     
-    init(selectedDays: [WeekDays]) {
+    init(selectedDays: [WeekDay]) {
         self.selectedDays = selectedDays
         super .init(nibName: nil, bundle: nil)
     }

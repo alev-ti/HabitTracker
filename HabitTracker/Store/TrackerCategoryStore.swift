@@ -47,7 +47,7 @@ final class TrackerCategoryStore: NSObject {
                 guard let id = $0.id,
                       let name = $0.name,
                       let emoji = $0.emoji,
-                      let schedule = $0.schedule as? [WeekDays] else { throw TrackerCategoryStoreError.decodingErrorInvalid }
+                      let schedule = $0.schedule as? [WeekDay] else { throw TrackerCategoryStoreError.decodingErrorInvalid }
                 
                 guard let colorString = $0.color, let color = UIColor(hex: colorString) else {
                     throw TrackerCategoryStoreError.decodingErrorInvalid

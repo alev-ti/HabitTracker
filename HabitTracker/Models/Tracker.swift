@@ -5,10 +5,10 @@ struct Tracker {
     let name: String
     let color: UIColor
     let emoji: String
-    let schedule: [WeekDays]
+    let schedule: [WeekDay]
 }
 
-enum WeekDays: String, CaseIterable, Codable {
+enum WeekDay: String, CaseIterable, Codable {
     
     case Monday = "Понедельник"
     case Tuesday = "Вторник"
