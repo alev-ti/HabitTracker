@@ -17,23 +17,34 @@ protocol DataProviderProtocol {
 
 final class DataProvider: NSObject {
     
-    enum DataProviderError: Error {
-        case failedToInitializeContext
-    }
-    
     private lazy var trackerCategoryStore: TrackerCategoryStoreProtocol? = {
-        guard let delegate = delegate else { return nil }
-        trackerCategoryStore = TrackerCategoryStore(context: self.context, delegate: delegate)
-        return trackerCategoryStore
-        
+        guard let delegate = delegate, let context = self.context else {
+            assertionFailure("Delegate or context is nil")
+            return nil
+        }
+        return TrackerCategoryStore(context: context, delegate: delegate)
     }()
-    private lazy var trackerStore: TrackerStoreProtocol = TrackerStore(context: self.context)
-    private lazy var trackerRecordStore: TrackerRecordStoreProtocol = TrackerRecordStore(context: self.context)
+    private lazy var trackerStore: TrackerStoreProtocol = {
+        guard let context = self.context else {
+            assertionFailure("Context is nil")
+            return TrackerStore(context: NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
+        }
+        return TrackerStore(context: context)
+    }()
+    private lazy var trackerRecordStore: TrackerRecordStoreProtocol = {
+        guard let context = self.context else {
+            assertionFailure("Context is nil")
+            return TrackerRecordStore(context: NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
+        }
+        return TrackerRecordStore(context: context)
+    }()
     
     private weak var delegate: DataProviderDelegate?
-    private let context: NSManagedObjectContext
+    private var context: NSManagedObjectContext? {
+        return persistentContainer?.viewContext
+    }
     
-    var persistentContainer: NSPersistentContainer!
+    var persistentContainer: NSPersistentContainer?
     
     init(delegate: DataProviderDelegate) {
         let container = NSPersistentContainer(name: "HabitTracker")
@@ -43,12 +54,15 @@ final class DataProvider: NSObject {
             }
         }
         self.persistentContainer = container
-        self.context = persistentContainer.viewContext
         self.delegate = delegate
     }
     
     func saveContext() {
-        let context = persistentContainer.viewContext
+        guard let context = persistentContainer?.viewContext else {
+            assertionFailure("persistentContainer is nil")
+            return
+        }
+        
         if context.hasChanges {
             do {
                 try context.save()
@@ -88,7 +102,10 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func addTracker(categoryHeader: String, tracker: Tracker) {
-        guard let trackerCategoryStore else { return }
+        guard let trackerCategoryStore = trackerCategoryStore, let context = context else {
+            assertionFailure("trackerCategoryStore or context is nil")
+            return
+        }
         if let categoryIsExist = trackerCategoryStore.checkCategoryExistence(categoryHeader: categoryHeader) {
             do {
                 try trackerStore.addNewTracker(category: categoryIsExist, tracker: tracker)
@@ -98,7 +115,7 @@ extension DataProvider: DataProviderProtocol {
             }
             return
         } else {
-            let trackerCategory = TrackerCategoryCoreData(context: self.context)
+            let trackerCategory = TrackerCategoryCoreData(context: context)
             trackerCategory.title = categoryHeader
             try? context.save()
             do {
