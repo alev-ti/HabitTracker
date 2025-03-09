@@ -12,7 +12,8 @@ final class ScheduleTableViewCell: UITableViewCell {
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        return nil
     }
     
     func configureCell(nameLabel: String) {
@@ -29,11 +30,11 @@ final class ScheduleTableViewCell: UITableViewCell {
     }
     
     func isToggleOn() -> Bool {
-        return toggle.isOn
+        toggle.isOn
     }
 }
 
-//MARK: Configure UI
+
 private extension ScheduleTableViewCell {
     func configureUI() {
         configureNameLabelAndToggle()

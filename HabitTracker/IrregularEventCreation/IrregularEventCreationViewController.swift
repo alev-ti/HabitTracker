@@ -62,14 +62,48 @@ final class IrregularEventCreationViewController: UIViewController {
     
     private let tableData = ["Категория"]
     
+    private lazy var trackerDetailCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.headerReferenceSize = CGSize(width: view.frame.width, height: 20)
+        layout.sectionInset = UIEdgeInsets(top: 24, left: 18, bottom: 24, right: 18)
+
+        let numberOfItemsInRow: CGFloat = 6
+        let itemWidth = (view.frame.width - layout.sectionInset.left - layout.sectionInset.right - (numberOfItemsInRow - 1) * 8) / numberOfItemsInRow
+        let itemHeight = itemWidth
+
+        layout.itemSize = CGSize(width: itemWidth, height: itemHeight)
+        layout.minimumInteritemSpacing = 4
+        layout.minimumLineSpacing = 4
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .white
+        collectionView.alwaysBounceVertical = true
+        collectionView.allowsMultipleSelection = true
+        collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: EmojiCell.identifier)
+        collectionView.register(ColorCell.self, forCellWithReuseIdentifier: ColorCell.identifier)
+        collectionView.register(TrackerDetailHeaderSupplementaryView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "trackerDetailHeader")
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+    
+    private var selectedEmoji: String?
+    private var selectedEmojiIndexPath: IndexPath?
+    private var selectedColor: UIColor?
+    private var selectedColorIndexPath: IndexPath?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         self.hideKeyboardWhenTapped()
     }
     
+    private var trackerDetailCollectionViewData: [TrackerDetailCell] = [
+        TrackerDetailCell(header: "Emoji", type: .emoji(TrackerDetails.emojis)),
+        TrackerDetailCell(header: "Цвет", type: .color(TrackerDetails.colors))
+    ]
+    
     private func validateForm() {
-        let isValid = !nameTextField.text!.isEmpty
+        let isValid = !nameTextField.text!.isEmpty && selectedEmoji != nil && selectedColor != nil
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid
             ? Color.lightBlack
@@ -84,6 +118,7 @@ final class IrregularEventCreationViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(cancelButton)
         view.addSubview(createButton)
+        view.addSubview(trackerDetailCollectionView)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
@@ -98,6 +133,11 @@ final class IrregularEventCreationViewController: UIViewController {
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             tableView.heightAnchor.constraint(equalToConstant: 75),
+            
+            trackerDetailCollectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 32),
+            trackerDetailCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            trackerDetailCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            trackerDetailCollectionView.bottomAnchor.constraint(equalTo: createButton.topAnchor, constant: -16),
             
             cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
@@ -115,6 +155,9 @@ final class IrregularEventCreationViewController: UIViewController {
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
+        trackerDetailCollectionView.dataSource = self
+        trackerDetailCollectionView.delegate = self
+        
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
         nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
@@ -129,8 +172,12 @@ final class IrregularEventCreationViewController: UIViewController {
     }
     
     @objc private func createButtonTapped() {
-        guard let name = nameTextField.text, !name.isEmpty else { return }
-        let tracker = Tracker(id: UUID(), name: name, color: .systemPink, emoji: "😼", schedule: [])
+        guard let name = nameTextField.text,
+              !name.isEmpty,
+              let color = selectedColor,
+              let emoji = selectedEmoji
+        else { return }
+        let tracker = Tracker(id: UUID(), name: name, color: color, emoji: emoji, schedule: [])
         let today = Calendar.current.startOfDay(for: Date())
         let record = TrackerRecord(id: tracker.id, date: today)
 
@@ -153,10 +200,10 @@ final class IrregularEventCreationViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDelegate, UITableViewDataSource
+
 extension IrregularEventCreationViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableData.count
+        tableData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -187,3 +234,79 @@ extension IrregularEventCreationViewController: UITableViewDelegate, UITableView
     }
 }
 
+extension IrregularEventCreationViewController: UICollectionViewDelegate,UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        trackerDetailCollectionViewData.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch trackerDetailCollectionViewData[section].type {
+        case .emoji(let emojis):
+            return emojis.count
+        case .color(let colors):
+            return colors.count
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        switch trackerDetailCollectionViewData[indexPath.section].type {
+        case .emoji(let emojis):
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCell.identifier, for: indexPath) as? EmojiCell else {
+                    return UICollectionViewCell()
+                }
+            cell.prepareForReuse()
+            cell.configureCell(emoji: emojis[indexPath.item])
+            return cell
+        case .color(let colors):
+                guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.identifier, for: indexPath) as? ColorCell else {
+                    return UICollectionViewCell()
+                }
+            cell.prepareForReuse()
+            cell.configureCell(colors[indexPath.row])
+            return cell
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "trackerDetailHeader", for: indexPath) as? TrackerDetailHeaderSupplementaryView
+        view?.titleLabel.text = trackerDetailCollectionViewData[indexPath.section].header
+        return view ?? UICollectionReusableView()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        switch trackerDetailCollectionViewData[indexPath.section].type {
+        case .emoji(let emoji):
+            guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCell else { return }
+            if let selectedEmojiIndexPath,
+               let previousCell = collectionView.cellForItem(at: selectedEmojiIndexPath) as? EmojiCell {
+                self.selectedEmojiIndexPath = indexPath
+                previousCell.selectCell(select: false)
+                collectionView.deselectItem(at: selectedEmojiIndexPath, animated: true)
+                
+                cell.selectCell(select: true)
+                self.selectedEmoji = emoji[indexPath.row]
+                return
+            }
+            self.selectedEmojiIndexPath = indexPath
+            cell.selectCell(select: true)
+            self.selectedEmoji = emoji[indexPath.row]
+            
+        case .color(let color):
+            guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCell else { return }
+            if let selectedColorIndexPath,
+               let previousCell = collectionView.cellForItem(at: selectedColorIndexPath) as? ColorCell {
+                self.selectedColorIndexPath = indexPath
+                previousCell.selectCell(select: false)
+                collectionView.deselectItem(at: selectedColorIndexPath, animated: true)
+                
+                cell.selectCell(select: true)
+                self.selectedColor = color[indexPath.row]
+                return
+            }
+            self.selectedColorIndexPath = indexPath
+            cell.selectCell(select: true)
+            self.selectedColor = color[indexPath.row]
+        }
+        validateForm()
+    }
+}

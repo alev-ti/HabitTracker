@@ -57,17 +57,22 @@ final class TrackersViewController: UIViewController {
         return picker
     }()
     
-    // Список категорий и вложенных в них трекеров
-    var categories: [TrackerCategory] = mockCategories
-    // Трекеры, которые были «выполнены» в выбранную дату
+    var categories: [TrackerCategory] = []
     var completedTrackers: Set<TrackerRecord> = []
-    // Текущая дата
     private var currentDate: Date = Date()
     private var filteredCategories: [TrackerCategory] = []
     private var isSearching = false
+    private lazy var dataProvider: DataProviderProtocol = {
+        DataProvider(delegate: self)
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let trackerCategories = dataProvider.getAllTrackerCategory()
+
+        self.completedTrackers = Set(dataProvider.getAllRecords())
+        
+        self.categories = trackerCategories ?? []
         searchBar.delegate = self
         setupUI()
         setupDatePicker()
@@ -148,7 +153,7 @@ final class TrackersViewController: UIViewController {
     }
 
     private func completedDays(for trackerId: UUID) -> Int {
-        return completedTrackers.filter { $0.id == trackerId }.count
+        completedTrackers.filter { $0.id == trackerId }.count
     }
     
     @objc private func addTracker() {
@@ -171,9 +176,8 @@ final class TrackersViewController: UIViewController {
             self?.dismiss(animated: true)
         }
         habitVC.onCreate = { [weak self] tracker in
-            let newCategory = TrackerCategory(title: "Привычки", trackers: [tracker])
-            self?.categories.append(newCategory)
             self?.dismiss(animated: true)
+            self?.dataProvider.addTracker(categoryHeader: "Привычки", tracker: tracker)
             self?.collectionView.reloadData()
             self?.updateStubVisibility()
         }
@@ -187,29 +191,34 @@ final class TrackersViewController: UIViewController {
             self?.dismiss(animated: true)
         }
         irregularEventVC.onCreate = { [weak self] trackerCategory in
-            let newCategory = TrackerCategory(title: trackerCategory.title, trackers: trackerCategory.trackers)
-            self?.categories.append(newCategory)
             self?.dismiss(animated: true)
+            self?.dataProvider.addTrackerCategory(categoryHeader: trackerCategory.title)
+            trackerCategory.trackers.forEach { tracker in
+                self?.dataProvider.addTracker(categoryHeader: trackerCategory.title, tracker: tracker)
+            }
             self?.collectionView.reloadData()
             self?.updateStubVisibility()
         }
         present(irregularEventVC, animated: true)
     }
     
-    private func toggleTrackerCompletion(for trackerId: UUID) {
+    private func toggleTrackerCompletion(for tracker: Tracker) {
         let today = Calendar.current.startOfDay(for: currentDate)
         let now = Calendar.current.startOfDay(for: Date())
 
         guard today <= now else { return }
         
-        let record = TrackerRecord(id: trackerId, date: today)
+        let record = TrackerRecord(id: tracker.id, date: today)
         
-        if let existingRecord = completedTrackers.first(where: { $0.id == trackerId && Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+        if let existingRecord = completedTrackers.first(where: { $0.id == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: today) }) {
             completedTrackers.remove(existingRecord)
-            reloadData()
         } else {
-            completedTrackers.insert(record)
-            collectionView.reloadData()
+            do {
+                try dataProvider.addNewRecord(tracker: tracker, trackerRecord: record)
+                completedTrackers.insert(record)
+            } catch {
+                print("failed to add new record")
+            }
         }
         collectionView.reloadData()
     }
@@ -226,7 +235,7 @@ final class TrackersViewController: UIViewController {
         dateFormatter.dateFormat = "EEEE"
         let weekdayName = dateFormatter.string(from: today)
 
-        guard let weekDay = WeekDays(from: weekdayName) else {
+        guard let weekDay = WeekDay(from: weekdayName) else {
             return categories
         }
 
@@ -251,11 +260,11 @@ final class TrackersViewController: UIViewController {
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return getVisibleCategories().count
+        getVisibleCategories().count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return getVisibleCategories()[section].trackers.count
+        getVisibleCategories()[section].trackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -267,7 +276,7 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
         let daysCount = completedDays(for: tracker.id)
         
         cell.configure(with: tracker, isCompleted: isCompletedToday, daysCount: daysCount, completionHandler: { [weak self] in
-            self?.toggleTrackerCompletion(for: tracker.id)
+            self?.toggleTrackerCompletion(for: tracker)
         })
         return cell
     }
@@ -278,13 +287,13 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as! TrackerHeaderView
-        header.changeTitleLabel(with: getVisibleCategories()[indexPath.section].title)
-        return header
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "Header", for: indexPath) as? TrackerHeaderView
+        header?.changeTitleLabel(with: getVisibleCategories()[indexPath.section].title)
+        return header ?? UICollectionReusableView()
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: 40)
+        CGSize(width: collectionView.bounds.width, height: 40)
     }
 }
 
@@ -313,5 +322,12 @@ extension TrackersViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
         collectionView.reloadData()
         updateStubVisibility()
+    }
+}
+
+extension TrackersViewController: DataProviderDelegate {
+    func didUpdate() {
+        let trackerCategories = dataProvider.getAllTrackerCategory()
+        self.categories = trackerCategories ?? []
     }
 }

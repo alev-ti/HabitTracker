@@ -2,22 +2,23 @@ import UIKit
 
 final class ScheduleCreationViewController: UIViewController {
     
-    var completionHandler: (([WeekDays]) -> Void)?
+    var completionHandler: (([WeekDay]) -> Void)?
     
     private lazy var tableView = UITableView()
     private lazy var readyButton = UIButton(type: .system)
     weak var delegate: ScheduleSelectionDelegate?
     
-    private let tableViewData = WeekDays.allCases
-    private var selectedDays: [WeekDays] = []
+    private let tableViewData = WeekDay.allCases
+    private var selectedDays: [WeekDay] = []
     
-    init(selectedDays: [WeekDays]) {
+    init(selectedDays: [WeekDay]) {
         self.selectedDays = selectedDays
         super .init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        return nil
     }
     
     override func viewDidLoad() {
@@ -34,7 +35,7 @@ extension ScheduleCreationViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ScheduleTableViewCell.reuseIdentifier, for: indexPath)
         
-        guard let scheduleTableViewCell = cell as? ScheduleTableViewCell else {return UITableViewCell()}
+        guard let scheduleTableViewCell = cell as? ScheduleTableViewCell else { return UITableViewCell() }
         scheduleTableViewCell.configureCell(nameLabel: tableViewData[indexPath.row].rawValue)
         if selectedDays.contains(tableViewData[indexPath.row]) {
             scheduleTableViewCell.toggleOn()
@@ -77,7 +78,7 @@ extension ScheduleCreationViewController: UITableViewDelegate {
     }
 }
 
-//MARK: Configure UI
+
 private extension ScheduleCreationViewController {
     private func setupUI() {
         view.backgroundColor = .white
