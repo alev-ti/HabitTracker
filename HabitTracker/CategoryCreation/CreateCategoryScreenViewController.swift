@@ -3,7 +3,7 @@ import UIKit
 final class CreateCategoryScreenViewController: UIViewController {
     
     private let nameCategoryTextField = UITextField()
-    private let addCategoryButton = UIButton()
+    private let doneButton = UIButton()
     private weak var delegate: CreateNewCategoryDelegate?
     
     init(delegate: CreateNewCategoryDelegate) {
@@ -73,32 +73,32 @@ private extension CreateCategoryScreenViewController {
     }
     
     func setupDoneButton() {
-        addCategoryButton.translatesAutoresizingMaskIntoConstraints = false
-        addCategoryButton.backgroundColor = Color.gray
-        addCategoryButton.isEnabled = false
-        addCategoryButton.setTitle("Готово", for: .normal)
-        addCategoryButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        addCategoryButton.layer.cornerRadius = 16
-        addCategoryButton.clipsToBounds = true
-        addCategoryButton.addTarget(self, action: #selector(addCategoryButtonTapped), for: .touchUpInside)
+        doneButton.translatesAutoresizingMaskIntoConstraints = false
+        doneButton.backgroundColor = Color.gray
+        doneButton.isEnabled = false
+        doneButton.setTitle("Готово", for: .normal)
+        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        doneButton.layer.cornerRadius = 16
+        doneButton.clipsToBounds = true
+        doneButton.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
         
-        view.addSubview(addCategoryButton)
+        view.addSubview(doneButton)
         
         NSLayoutConstraint.activate([
-            addCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            addCategoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            addCategoryButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            addCategoryButton.heightAnchor.constraint(equalToConstant: 60)
+            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            doneButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
     @objc private func textFieldDidChange() {
         let isEmpty = nameCategoryTextField.text?.isEmpty ?? true
-        addCategoryButton.backgroundColor = isEmpty ? Color.gray : Color.lightBlack
-        addCategoryButton.isEnabled = !isEmpty
+        doneButton.backgroundColor = isEmpty ? Color.gray : Color.lightBlack
+        doneButton.isEnabled = !isEmpty
     }
     
-    @objc private func addCategoryButtonTapped() {
+    @objc private func doneButtonTapped() {
         guard let text = nameCategoryTextField.text else { return }
         dismiss(animated: true) {
             self.delegate?.createNewCategory(title: text)

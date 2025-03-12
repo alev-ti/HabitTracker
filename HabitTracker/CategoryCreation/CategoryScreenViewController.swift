@@ -92,6 +92,8 @@ extension CategoryScreenViewController: UITableViewDelegate {
     }
     
     private func configureCellAppearance(_ cell: UITableViewCell, at indexPath: IndexPath, for count: Int) {
+        cell.layer.masksToBounds = true
+        cell.layer.cornerRadius = 16
         if count == 1 {
             configureSingleCell(cell)
             return
@@ -105,20 +107,14 @@ extension CategoryScreenViewController: UITableViewDelegate {
     }
     
     private func configureSingleCell(_ cell: UITableViewCell) {
-        cell.layer.masksToBounds = true
-        cell.layer.cornerRadius = 16
         cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
     }
     
     private func configureTopCell(_ cell: UITableViewCell) {
-        cell.layer.masksToBounds = true
-        cell.layer.cornerRadius = 16
         cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     }
     
     private func configureBottomCell(_ cell: UITableViewCell) {
-        cell.layer.masksToBounds = true
-        cell.layer.cornerRadius = 16
         cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
         cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
     }
