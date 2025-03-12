@@ -7,8 +7,8 @@ enum TrackerCategoryStoreError: Error {
 
 protocol TrackerCategoryStoreProtocol: AnyObject {
     func getAllTrackerCategory() -> [TrackerCategory]?
-    func checkCategoryExistence(categoryHeader: String) -> TrackerCategoryCoreData?
-    func addTrackerCategory(categoryHeader: String)
+    func checkCategoryExistence(categoryTitle: String) -> TrackerCategoryCoreData?
+    func addTrackerCategory(title: String)
 }
 
 final class TrackerCategoryStore: NSObject {
@@ -73,20 +73,18 @@ extension TrackerCategoryStore: TrackerCategoryStoreProtocol {
         return trackerCategoryArray
     }
     
-    func checkCategoryExistence(categoryHeader: String) -> TrackerCategoryCoreData? {
-        if let categoryAlreadyExists = fetchedResultsController.fetchedObjects?.first(where: { $0.title == categoryHeader}) {
-            return categoryAlreadyExists
-        }
-        return nil
+    func checkCategoryExistence(categoryTitle: String) -> TrackerCategoryCoreData? {
+        try? fetchedResultsController.performFetch()
+        return fetchedResultsController.fetchedObjects?.first(where: { $0.title == categoryTitle })
     }
     
-    func addTrackerCategory(categoryHeader: String) {
+    func addTrackerCategory(title: String) {
         guard let fetchedCategory = fetchedResultsController.fetchedObjects else { return }
-        if fetchedCategory.contains(where: { $0.title == categoryHeader }) {
+        if fetchedCategory.contains(where: { $0.title == title }) {
             return
         }
         let trackerCategory = TrackerCategoryCoreData(context: context)
-        trackerCategory.title = categoryHeader
+        trackerCategory.title = title
         do {
             try context.save()
             print("Категория сохранилась")
