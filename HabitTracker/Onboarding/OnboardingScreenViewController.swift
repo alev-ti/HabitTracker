@@ -7,12 +7,10 @@ final class OnboardingScreenViewController: UIViewController {
     private let backgroundImage = UIImageView()
     
     private weak var delegate: OnboardingScreenDelegate?
-    private let image: UIImage
-    private let text: String
+    private let pageModel: PageModel
     
-    init(image: UIImage, text: String, delegate: OnboardingScreenDelegate) {
-        self.image = image
-        self.text = text
+    init(pageModel: PageModel, delegate: OnboardingScreenDelegate) {
+        self.pageModel = pageModel
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
@@ -35,14 +33,14 @@ final class OnboardingScreenViewController: UIViewController {
     }
     
     private func configureBackgroundImage() {
-        backgroundImage.image = image
+        backgroundImage.image = pageModel.image
         backgroundImage.contentMode = .scaleAspectFill
         backgroundImage.frame = view.bounds
         view.addSubview(backgroundImage)
     }
     
     private func configureTextLabel() {
-        textLabel.text = text
+        textLabel.text = pageModel.text
         textLabel.font = .boldSystemFont(ofSize: 32)
         textLabel.textColor = .black
         textLabel.textAlignment = .center

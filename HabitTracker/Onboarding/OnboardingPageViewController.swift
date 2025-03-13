@@ -40,16 +40,8 @@ final class OnboardingPageViewController: UIPageViewController, OnboardingScreen
     }
     
     private func createPages() -> [UIViewController] {
-        let blueScreen = OnboardingScreenViewController(
-            image: UIImage(named: "onboarding_blue") ?? UIImage(),
-            text: "Отслеживайте только то, что хотите",
-            delegate: self
-        )
-        let redScreen = OnboardingScreenViewController(
-            image: UIImage(named: "onboarding_red") ?? UIImage(),
-            text: "Даже если это не литры воды и йога",
-            delegate: self
-        )
+        let blueScreen = OnboardingScreenViewController(pageModel: .bluePage, delegate: self)
+        let redScreen = OnboardingScreenViewController(pageModel: .redPage, delegate: self)
         return [blueScreen, redScreen]
     }
 }
