@@ -80,6 +80,8 @@ final class HabitCreationViewController: UIViewController {
         return label
     }()
     
+    let viewModel = CategoryViewModel()
+    
     private var tableViewData: [CellData] = [
         CellData(title: "Категория"),
         CellData(title: "Расписание")
@@ -282,7 +284,7 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         
         switch indexPath.row {
         case 0:
-                let categoriesScreenViewController = CategoryScreenViewController(selectedCategory: selectedCategoryTitle)
+                let categoriesScreenViewController = CategoryScreenViewController(viewModel: viewModel, selectedCategory: selectedCategoryTitle)
                 categoriesScreenViewController.completionHandler = { [weak self] categoryTitle in
                     self?.selectedCategoryTitle = categoryTitle
                     self?.tableViewData[0].text = categoryTitle

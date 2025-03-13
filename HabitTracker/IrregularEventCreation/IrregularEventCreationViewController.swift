@@ -100,6 +100,8 @@ final class IrregularEventCreationViewController: UIViewController {
     private var selectedColorIndexPath: IndexPath?
     private var selectedCategoryTitle: String?
     
+    let viewModel = CategoryViewModel()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -245,7 +247,7 @@ extension IrregularEventCreationViewController: UITableViewDelegate, UITableView
         
         switch indexPath.row {
         case 0:
-            let categoriesScreenViewController = CategoryScreenViewController(selectedCategory: selectedCategoryTitle)
+                let categoriesScreenViewController = CategoryScreenViewController(viewModel: viewModel, selectedCategory: selectedCategoryTitle)
             categoriesScreenViewController.completionHandler = { [weak self] categoryTitle in
                 self?.selectedCategoryTitle = categoryTitle
                 self?.tableViewData[0].text = categoryTitle

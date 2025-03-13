@@ -5,7 +5,7 @@ protocol CreateNewCategoryDelegate: AnyObject {
 }
 
 final class CategoryScreenViewController: UIViewController {
-    private var viewModel: CategoryViewModelProtocol?
+    private let viewModel: CategoryViewModelProtocol
     
     private lazy var tableView = UITableView()
     private let addCategoryButton: UIButton = UIButton()
@@ -27,7 +27,8 @@ final class CategoryScreenViewController: UIViewController {
     
     var completionHandler: ((String?) -> Void)?
     
-    init(selectedCategory: String? = nil) {
+    init(viewModel: CategoryViewModelProtocol, selectedCategory: String? = nil) {
+        self.viewModel = viewModel
         self.selectedCategoryTitle = selectedCategory
         super.init(nibName: nil, bundle: nil)
     }
@@ -40,16 +41,14 @@ final class CategoryScreenViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        setupViewModel()
-        toggleStubVisibility(isVisible: viewModel?.trackerCategories.count == 0)
-    }
-    
-    private func setupViewModel() {
-        viewModel = CategoryViewModel()
-        viewModel?.categoriesBinding = {[weak self] _ in
-            self?.toggleStubVisibility(isVisible: self?.viewModel?.trackerCategories.count == 0)
+        
+        // Устанавливаем binding для viewModel
+        viewModel.categoriesBinding = { [weak self] _ in
+            self?.toggleStubVisibility(isVisible: self?.viewModel.trackerCategories.count == 0)
             self?.tableView.reloadData()
         }
+        
+        toggleStubVisibility(isVisible: viewModel.trackerCategories.count == 0)
     }
     
     private func toggleStubVisibility(isVisible: Bool) {
@@ -57,17 +56,18 @@ final class CategoryScreenViewController: UIViewController {
     }
 }
 
+// MARK: - UITableViewDataSource
 extension CategoryScreenViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel?.trackerCategories.count ?? 0
+        return viewModel.trackerCategories.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: CategoryTableViewCell.reuseIdentifier, for: indexPath) as? CategoryTableViewCell,
-              let category = viewModel?.trackerCategories[indexPath.row] else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: CategoryTableViewCell.reuseIdentifier, for: indexPath) as? CategoryTableViewCell else {
             return UITableViewCell()
         }
         
+        let category = viewModel.trackerCategories[indexPath.row]
         let isSelected = selectedCategoryTitle == category.title
         let categoryCell = CategoryCellModel(title: category.title, isSelected: isSelected)
         cell.configureCell(with: categoryCell)
@@ -75,15 +75,16 @@ extension CategoryScreenViewController: UITableViewDataSource {
     }
 }
 
+// MARK: - UITableViewDelegate
 extension CategoryScreenViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        completionHandler?(viewModel?.trackerCategories[indexPath.row].title)
+        completionHandler?(viewModel.trackerCategories[indexPath.row].title)
         dismiss(animated: true, completion: nil)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        guard let count = viewModel?.trackerCategories.count else { return }
+        let count = viewModel.trackerCategories.count
         cell.layer.masksToBounds = false
         cell.layer.cornerRadius = 0
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -124,12 +125,14 @@ extension CategoryScreenViewController: UITableViewDelegate {
     }
 }
 
+// MARK: - CreateNewCategoryDelegate
 extension CategoryScreenViewController: CreateNewCategoryDelegate {
     func createNewCategory(title: String) {
-        viewModel?.addNewCategory(title: title)
+        viewModel.addNewCategory(title: title)
     }
 }
 
+// MARK: - UI Setup
 private extension CategoryScreenViewController {
     func setupUI() {
         view.backgroundColor = .white
