@@ -8,7 +8,7 @@ protocol ScheduleSelectionDelegate: AnyObject {
 final class HabitCreationViewController: UIViewController {
     
     var onCancel: (() -> Void)?
-    var onCreate: ((Tracker) -> Void)?
+    var onCreate: ((TrackerCategory) -> Void)?
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -72,7 +72,20 @@ final class HabitCreationViewController: UIViewController {
         return label
     }()
     
-    private let tableData = ["Категория", "Расписание"]
+    private lazy var categoryLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.textColor = .gray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    let viewModel = CategoryViewModel()
+    
+    private var tableViewData: [CellData] = [
+        CellData(title: "Категория"),
+        CellData(title: "Расписание")
+    ]
     
     private lazy var trackerDetailCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -108,6 +121,7 @@ final class HabitCreationViewController: UIViewController {
     private var selectedEmojiIndexPath: IndexPath?
     private var selectedColor: UIColor?
     private var selectedColorIndexPath: IndexPath?
+    private var selectedCategoryTitle: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -121,7 +135,7 @@ final class HabitCreationViewController: UIViewController {
     ]
     
     private func validateForm() {
-        let isValid = !nameTextField.text!.isEmpty && !selectedDays.isEmpty && selectedEmoji != nil && selectedColor != nil
+        let isValid = !nameTextField.text!.isEmpty && !selectedDays.isEmpty && selectedEmoji != nil && selectedColor != nil && selectedCategoryTitle != nil
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid
             ? Color.lightBlack
@@ -141,6 +155,7 @@ final class HabitCreationViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(cancelButton)
         view.addSubview(createButton)
+        view.addSubview(categoryLabel)
         view.addSubview(scheduleLabel)
         view.addSubview(trackerDetailCollectionView)
         
@@ -196,63 +211,67 @@ final class HabitCreationViewController: UIViewController {
     }
     
     @objc private func createButtonTapped() {
+        let id = UUID()
+        let schedule = selectedDays
         guard let name = nameTextField.text,
               !name.isEmpty,
               let color = selectedColor,
-              let emoji = selectedEmoji
+              let emoji = selectedEmoji,
+              let categoryTitle = selectedCategoryTitle
         else { return }
-        let tracker = Tracker(
-            id: UUID(),
-            name: name,
-            color: color,
-            emoji: emoji,
-            schedule: selectedDays)
-        onCreate?(tracker)
+        let trackerCategory = TrackerCategory(title: categoryTitle, trackers: [Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)])
+        onCreate?(trackerCategory)
     }
 }
 
 
 extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        tableData.count
+        tableViewData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = tableData[indexPath.row]
+        cell.textLabel?.text = tableViewData[indexPath.row].title
         cell.accessoryType = .disclosureIndicator // Шеврон вправо
         cell.backgroundColor = Color.lightGray
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        cell.textLabel?.text = nil
+        let titleLabel = UILabel()
+        titleLabel.text = tableViewData[indexPath.row].title
+        titleLabel.font = UIFont.systemFont(ofSize: 16)
+        titleLabel.textColor = .black
+        
+        stackView.addArrangedSubview(titleLabel)
+        
+        if indexPath.row == 0 {
+            if selectedCategoryTitle != nil {
+                categoryLabel.text = selectedCategoryTitle
+                stackView.addArrangedSubview(categoryLabel)
+            }
+        }
         
         if indexPath.row == 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
-            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            
-            let stackView = UIStackView()
-            stackView.axis = .vertical
-            stackView.spacing = 4
-            stackView.translatesAutoresizingMaskIntoConstraints = false
-            
-            cell.textLabel?.text = nil
-            let titleLabel = UILabel()
-            titleLabel.text = "Расписание"
-            titleLabel.font = UIFont.systemFont(ofSize: 16)
-            titleLabel.textColor = .black
-            
-            stackView.addArrangedSubview(titleLabel)
-            
             if !selectedDays.isEmpty {
                 scheduleLabel.text = selectedDays.map { $0.getShortName() }.joined(separator: ", ")
                 stackView.addArrangedSubview(scheduleLabel)
             }
-            
-            cell.contentView.addSubview(stackView)
-            
-            NSLayoutConstraint.activate([
-                stackView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
-                stackView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -32),
-                stackView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-            ])
         }
+        
+        cell.contentView.addSubview(stackView)
+        
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -32),
+            stackView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+        ])
         return cell
     }
     
@@ -265,13 +284,27 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         
         switch indexPath.row {
         case 0:
-            // Переход на экран выбора категории
-            print("Выбрана категория")
+                let categoriesScreenViewController = CategoryScreenViewController(viewModel: viewModel, selectedCategory: selectedCategoryTitle)
+                categoriesScreenViewController.completionHandler = { [weak self] categoryTitle in
+                    self?.selectedCategoryTitle = categoryTitle
+                    self?.tableViewData[0].text = categoryTitle
+                    self?.tableView.reloadData()
+                    self?.validateForm()
+                }
+                let navigationController = UINavigationController(rootViewController: categoriesScreenViewController)
+                
+                let textAttributes: [NSAttributedString.Key: Any] = [
+                    .foregroundColor: UIColor.black,
+                    .font: UIFont.systemFont(ofSize: 16, weight: .medium)
+                ]
+                navigationController.navigationBar.titleTextAttributes = textAttributes
+                present(navigationController, animated: true)
         case 1:
                 let scheduleScreenViewController = ScheduleCreationViewController(selectedDays: [])
             scheduleScreenViewController.completionHandler = { [weak self] data in
                 self?.selectedDays = data
                 self?.tableView.reloadData()
+                self?.validateForm()
             }
             
             let navigationController = UINavigationController(rootViewController: scheduleScreenViewController)

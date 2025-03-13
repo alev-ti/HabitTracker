@@ -5,8 +5,8 @@ protocol DataProviderDelegate: AnyObject {
 }
 
 protocol DataProviderProtocol {
-    func addTrackerCategory(categoryHeader: String)
-    func addTracker(categoryHeader: String, tracker: Tracker)
+    func addTrackerCategory(title: String)
+    func addTracker(categoryTitle: String, tracker: Tracker)
     
     func getAllTrackerCategory() -> [TrackerCategory]?
     
@@ -96,17 +96,17 @@ extension DataProvider: DataProviderProtocol {
         try trackerRecordStore.removeRecord(tracker: tracker, trackerRecord: trackerRecord)
     }
     
-    func addTrackerCategory(categoryHeader: String) {
+    func addTrackerCategory(title: String) {
         guard let trackerCategoryStore else { return }
-        trackerCategoryStore.addTrackerCategory(categoryHeader: categoryHeader)
+        trackerCategoryStore.addTrackerCategory(title: title)
     }
     
-    func addTracker(categoryHeader: String, tracker: Tracker) {
+    func addTracker(categoryTitle: String, tracker: Tracker) {
         guard let trackerCategoryStore = trackerCategoryStore, let context = context else {
             assertionFailure("trackerCategoryStore or context is nil")
             return
         }
-        if let categoryIsExist = trackerCategoryStore.checkCategoryExistence(categoryHeader: categoryHeader) {
+        if let categoryIsExist = trackerCategoryStore.checkCategoryExistence(categoryTitle: categoryTitle) {
             do {
                 try trackerStore.addNewTracker(category: categoryIsExist, tracker: tracker)
                 print("Новая категория и трекер добавлены")
@@ -116,7 +116,7 @@ extension DataProvider: DataProviderProtocol {
             return
         } else {
             let trackerCategory = TrackerCategoryCoreData(context: context)
-            trackerCategory.title = categoryHeader
+            trackerCategory.title = categoryTitle
             try? context.save()
             do {
                 try trackerStore.addNewTracker(category: trackerCategory, tracker: tracker)

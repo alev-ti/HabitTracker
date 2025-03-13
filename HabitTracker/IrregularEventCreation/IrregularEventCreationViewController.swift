@@ -60,7 +60,15 @@ final class IrregularEventCreationViewController: UIViewController {
         return button
     }()
     
-    private let tableData = ["Категория"]
+    private lazy var categoryLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.textColor = .gray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private var tableViewData: [CellData] = [CellData(title: "Категория")]
     
     private lazy var trackerDetailCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -90,6 +98,9 @@ final class IrregularEventCreationViewController: UIViewController {
     private var selectedEmojiIndexPath: IndexPath?
     private var selectedColor: UIColor?
     private var selectedColorIndexPath: IndexPath?
+    private var selectedCategoryTitle: String?
+    
+    let viewModel = CategoryViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -103,7 +114,7 @@ final class IrregularEventCreationViewController: UIViewController {
     ]
     
     private func validateForm() {
-        let isValid = !nameTextField.text!.isEmpty && selectedEmoji != nil && selectedColor != nil
+        let isValid = !nameTextField.text!.isEmpty && selectedEmoji != nil && selectedColor != nil && selectedCategoryTitle != nil
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid
             ? Color.lightBlack
@@ -175,45 +186,55 @@ final class IrregularEventCreationViewController: UIViewController {
         guard let name = nameTextField.text,
               !name.isEmpty,
               let color = selectedColor,
-              let emoji = selectedEmoji
+              let emoji = selectedEmoji,
+              let categoryTitle = selectedCategoryTitle
         else { return }
         let tracker = Tracker(id: UUID(), name: name, color: color, emoji: emoji, schedule: [])
-        let today = Calendar.current.startOfDay(for: Date())
-        let record = TrackerRecord(id: tracker.id, date: today)
-
-        
-        if let trackersVC = presentingViewController as? TrackersViewController {
-            if let index = trackersVC.categories.firstIndex(where: { $0.title == "Категория нерегулярных событий" }) {
-                let updatedCategory = trackersVC.categories[index]
-                let updatedTrackers = updatedCategory.trackers + [tracker]
-                trackersVC.categories[index] = TrackerCategory(title: updatedCategory.title, trackers: updatedTrackers)
-            } else {
-                let newCategory = TrackerCategory(title: "Категория нерегулярных событий", trackers: [tracker])
-                trackersVC.categories.append(newCategory)
-            }
-            
-            trackersVC.completedTrackers.insert(record)
-            trackersVC.reloadData()
-        }
-        
-        onCreate?(TrackerCategory(title: "Категория нерегулярных событий", trackers: [tracker]))
+        onCreate?(TrackerCategory(title: categoryTitle, trackers: [tracker]))
     }
 }
 
 
 extension IrregularEventCreationViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        tableData.count
+        tableViewData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = tableData[indexPath.row]
+        cell.textLabel?.text = tableViewData[indexPath.row].title
         cell.accessoryType = .disclosureIndicator // Шеврон вправо
         cell.backgroundColor = Color.lightGray
         cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
         cell.layer.cornerRadius = 16
         cell.layer.masksToBounds = true
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        cell.textLabel?.text = nil
+        let titleLabel = UILabel()
+        titleLabel.text = tableViewData[indexPath.row].title
+        titleLabel.font = UIFont.systemFont(ofSize: 16)
+        titleLabel.textColor = .black
+        
+        stackView.addArrangedSubview(titleLabel)
+        
+        if selectedCategoryTitle != nil {
+            categoryLabel.text = selectedCategoryTitle
+            stackView.addArrangedSubview(categoryLabel)
+        }
+        
+        cell.contentView.addSubview(stackView)
+        
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -32),
+            stackView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+        ])
         return cell
     }
     
@@ -226,8 +247,21 @@ extension IrregularEventCreationViewController: UITableViewDelegate, UITableView
         
         switch indexPath.row {
         case 0:
-            // Переход на экран выбора категории
-            print("Выбрана категория")
+                let categoriesScreenViewController = CategoryScreenViewController(viewModel: viewModel, selectedCategory: selectedCategoryTitle)
+            categoriesScreenViewController.completionHandler = { [weak self] categoryTitle in
+                self?.selectedCategoryTitle = categoryTitle
+                self?.tableViewData[0].text = categoryTitle
+                self?.tableView.reloadData()
+                self?.validateForm()
+            }
+            let navigationController = UINavigationController(rootViewController: categoriesScreenViewController)
+            
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor.black,
+                .font: UIFont.systemFont(ofSize: 16, weight: .medium)
+            ]
+            navigationController.navigationBar.titleTextAttributes = textAttributes
+            present(navigationController, animated: true)
         default:
             break
         }

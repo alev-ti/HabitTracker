@@ -1,23 +1,20 @@
 import UIKit
 
-// Главный экран
 final class TrackersViewController: UIViewController {
     
-    private lazy var stubImageView: UIImageView = {
+    private lazy var stubView: StubView = {
         let imageView = UIImageView(image: UIImage(named: "stub_no_trackers"))
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private lazy var stubLabel: UILabel = {
+        
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.textColor = Color.lightBlack
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 12)
         label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+        
+        return StubView(imageView: imageView, label: label)
     }()
     
     private lazy var titleLabel: UILabel = {
@@ -98,8 +95,8 @@ final class TrackersViewController: UIViewController {
         view.addSubview(titleLabel)
         view.addSubview(searchBar)
         view.addSubview(collectionView)
-        view.addSubview(stubImageView)
-        view.addSubview(stubLabel)
+        view.addSubview(stubView.imageView)
+        view.addSubview(stubView.label)
         
         // Констрейнты
         NSLayoutConstraint.activate([
@@ -115,13 +112,13 @@ final class TrackersViewController: UIViewController {
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
-            stubImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stubImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
-            stubImageView.widthAnchor.constraint(equalToConstant: 100),
-            stubImageView.heightAnchor.constraint(equalToConstant: 100),
+            stubView.imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stubView.imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
+            stubView.imageView.widthAnchor.constraint(equalToConstant: 100),
+            stubView.imageView.heightAnchor.constraint(equalToConstant: 100),
             
-            stubLabel.topAnchor.constraint(equalTo: stubImageView.bottomAnchor, constant: 10),
-            stubLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            stubView.label.topAnchor.constraint(equalTo: stubView.imageView.bottomAnchor, constant: 10),
+            stubView.label.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
         
         // Регистрация заголовка категории
@@ -147,8 +144,7 @@ final class TrackersViewController: UIViewController {
     
     private func updateStubVisibility() {
         let isEmpty = getVisibleCategories().isEmpty
-        stubImageView.isHidden = !isEmpty
-        stubLabel.isHidden = !isEmpty
+        stubView.setVisibility(isVisible: isEmpty)
         collectionView.isHidden = isEmpty
     }
 
@@ -175,9 +171,10 @@ final class TrackersViewController: UIViewController {
         habitVC.onCancel = { [weak self] in
             self?.dismiss(animated: true)
         }
-        habitVC.onCreate = { [weak self] tracker in
+        habitVC.onCreate = { [weak self] trackerCategory in
             self?.dismiss(animated: true)
-            self?.dataProvider.addTracker(categoryHeader: "Привычки", tracker: tracker)
+            guard let tracker = trackerCategory.trackers.first else { return }
+            self?.dataProvider.addTracker(categoryTitle: trackerCategory.title, tracker: tracker)
             self?.collectionView.reloadData()
             self?.updateStubVisibility()
         }
@@ -192,9 +189,8 @@ final class TrackersViewController: UIViewController {
         }
         irregularEventVC.onCreate = { [weak self] trackerCategory in
             self?.dismiss(animated: true)
-            self?.dataProvider.addTrackerCategory(categoryHeader: trackerCategory.title)
             trackerCategory.trackers.forEach { tracker in
-                self?.dataProvider.addTracker(categoryHeader: trackerCategory.title, tracker: tracker)
+                self?.dataProvider.addTracker(categoryTitle: trackerCategory.title, tracker: tracker)
             }
             self?.collectionView.reloadData()
             self?.updateStubVisibility()
