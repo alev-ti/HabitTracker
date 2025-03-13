@@ -60,6 +60,14 @@ final class IrregularEventCreationViewController: UIViewController {
         return button
     }()
     
+    private lazy var categoryLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.textColor = .gray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     private var tableViewData: [CellData] = [CellData(title: "Категория")]
     
     private lazy var trackerDetailCollectionView: UICollectionView = {
@@ -198,6 +206,33 @@ extension IrregularEventCreationViewController: UITableViewDelegate, UITableView
         cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
         cell.layer.cornerRadius = 16
         cell.layer.masksToBounds = true
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        cell.textLabel?.text = nil
+        let titleLabel = UILabel()
+        titleLabel.text = tableViewData[indexPath.row].title
+        titleLabel.font = UIFont.systemFont(ofSize: 16)
+        titleLabel.textColor = .black
+        
+        stackView.addArrangedSubview(titleLabel)
+        
+        if selectedCategoryTitle != nil {
+            categoryLabel.text = selectedCategoryTitle
+            stackView.addArrangedSubview(categoryLabel)
+        }
+        
+        cell.contentView.addSubview(stackView)
+        
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -32),
+            stackView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+        ])
         return cell
     }
     

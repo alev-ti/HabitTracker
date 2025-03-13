@@ -72,6 +72,14 @@ final class HabitCreationViewController: UIViewController {
         return label
     }()
     
+    private lazy var categoryLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.textColor = .gray
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     private var tableViewData: [CellData] = [
         CellData(title: "Категория"),
         CellData(title: "Расписание")
@@ -145,6 +153,7 @@ final class HabitCreationViewController: UIViewController {
         view.addSubview(tableView)
         view.addSubview(cancelButton)
         view.addSubview(createButton)
+        view.addSubview(categoryLabel)
         view.addSubview(scheduleLabel)
         view.addSubview(trackerDetailCollectionView)
         
@@ -224,37 +233,43 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         cell.textLabel?.text = tableViewData[indexPath.row].title
         cell.accessoryType = .disclosureIndicator // Шеврон вправо
         cell.backgroundColor = Color.lightGray
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        cell.textLabel?.text = nil
+        let titleLabel = UILabel()
+        titleLabel.text = tableViewData[indexPath.row].title
+        titleLabel.font = UIFont.systemFont(ofSize: 16)
+        titleLabel.textColor = .black
+        
+        stackView.addArrangedSubview(titleLabel)
+        
+        if indexPath.row == 0 {
+            if selectedCategoryTitle != nil {
+                categoryLabel.text = selectedCategoryTitle
+                stackView.addArrangedSubview(categoryLabel)
+            }
+        }
         
         if indexPath.row == 1 {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 1000)
-            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            
-            let stackView = UIStackView()
-            stackView.axis = .vertical
-            stackView.spacing = 4
-            stackView.translatesAutoresizingMaskIntoConstraints = false
-            
-            cell.textLabel?.text = nil
-            let titleLabel = UILabel()
-            titleLabel.text = "Расписание"
-            titleLabel.font = UIFont.systemFont(ofSize: 16)
-            titleLabel.textColor = .black
-            
-            stackView.addArrangedSubview(titleLabel)
-            
             if !selectedDays.isEmpty {
                 scheduleLabel.text = selectedDays.map { $0.getShortName() }.joined(separator: ", ")
                 stackView.addArrangedSubview(scheduleLabel)
             }
-            
-            cell.contentView.addSubview(stackView)
-            
-            NSLayoutConstraint.activate([
-                stackView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
-                stackView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -32),
-                stackView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-            ])
         }
+        
+        cell.contentView.addSubview(stackView)
+        
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -32),
+            stackView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+        ])
         return cell
     }
     
