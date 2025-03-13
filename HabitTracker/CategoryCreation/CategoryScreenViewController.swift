@@ -69,7 +69,7 @@ extension CategoryScreenViewController: UITableViewDataSource {
         }
         
         let isSelected = selectedCategoryTitle == category.title
-        let categoryCell = CategoryCell(title: category.title, isSelected: isSelected)
+        let categoryCell = CategoryCellModel(title: category.title, isSelected: isSelected)
         cell.configureCell(with: categoryCell)
         return cell
     }

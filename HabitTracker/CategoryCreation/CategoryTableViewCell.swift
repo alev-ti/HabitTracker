@@ -17,7 +17,7 @@ final class CategoryTableViewCell: UITableViewCell {
         return nil
     }
     
-    func configureCell(with cell: CategoryCell) {
+    func configureCell(with cell: CategoryCellModel) {
         nameLabel.text = cell.title
         checkMarkImage.image = cell.isSelected == true ? UIImage(systemName: "checkmark") : nil
     }
