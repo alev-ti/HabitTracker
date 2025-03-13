@@ -2,8 +2,31 @@ import UIKit
 
 final class CreateCategoryScreenViewController: UIViewController {
     
-    private let nameCategoryTextField = UITextField()
-    private let doneButton = UIButton()
+    private lazy var nameCategoryTextField: UITextField = {
+        let textField = UITextField()
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.placeholder = "Введите название категории"
+        textField.textColor = .black
+        textField.backgroundColor = Color.lightGray
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 40))
+        textField.leftViewMode = .always
+        textField.layer.cornerRadius = 16
+        textField.clipsToBounds = true
+        return textField
+    }()
+    
+    private lazy var doneButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = Color.gray
+        button.isEnabled = false
+        button.setTitle("Готово", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.layer.cornerRadius = 16
+        button.clipsToBounds = true
+        return button
+    }()
+    
     private weak var delegate: CreateNewCategoryDelegate?
     
     init(delegate: CreateNewCategoryDelegate) {
@@ -52,16 +75,7 @@ private extension CreateCategoryScreenViewController {
     
     func setupNameTextField() {
         nameCategoryTextField.delegate = self
-        nameCategoryTextField.translatesAutoresizingMaskIntoConstraints = false
-        nameCategoryTextField.placeholder = "Введите название категории"
-        nameCategoryTextField.textColor = .black
-        nameCategoryTextField.backgroundColor = Color.lightGray
-        nameCategoryTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 40))
-        nameCategoryTextField.leftViewMode = .always
-        nameCategoryTextField.layer.cornerRadius = 16
-        nameCategoryTextField.clipsToBounds = true
         nameCategoryTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        
         view.addSubview(nameCategoryTextField)
         
         NSLayoutConstraint.activate([
@@ -73,15 +87,7 @@ private extension CreateCategoryScreenViewController {
     }
     
     func setupDoneButton() {
-        doneButton.translatesAutoresizingMaskIntoConstraints = false
-        doneButton.backgroundColor = Color.gray
-        doneButton.isEnabled = false
-        doneButton.setTitle("Готово", for: .normal)
-        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        doneButton.layer.cornerRadius = 16
-        doneButton.clipsToBounds = true
         doneButton.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
-        
         view.addSubview(doneButton)
         
         NSLayoutConstraint.activate([
