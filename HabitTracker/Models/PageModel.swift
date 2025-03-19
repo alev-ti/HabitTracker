@@ -16,9 +16,9 @@ enum PageModel {
     var text: String {
         switch self {
         case .bluePage:
-            return "Отслеживайте только то, что хотите"
+            return NSLocalizedString("page_model.onboarding_blue", comment: "onboarding blue page text")
         case .redPage:
-            return "Даже если это не литры воды и йога"
+            return NSLocalizedString("page_model.onboarding_red", comment: "onboarding red page text")
         }
     }
 }

@@ -8,7 +8,7 @@ final class TrackersViewController: UIViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("trackers_view_controller.stub_text", comment: "stub text empty trackers")
         label.textColor = Color.lightBlack
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 12)
@@ -19,7 +19,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
-        titleLabel.text = "Трекеры"
+        titleLabel.text = NSLocalizedString("trackers_view_controller.title_trackers", comment: "title Trackers")
         titleLabel.font = UIFont.boldSystemFont(ofSize: 34)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         return titleLabel
@@ -27,7 +27,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var searchBar: UISearchBar = {
        let searchBar = UISearchBar()
-       searchBar.placeholder = "Поиск"
+       searchBar.placeholder = NSLocalizedString("trackers_view_controller.search_input_placeholder", comment: "search placeholder")
        searchBar.backgroundImage = UIImage()
        searchBar.translatesAutoresizingMaskIntoConstraints = false
        return searchBar

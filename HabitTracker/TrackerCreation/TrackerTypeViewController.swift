@@ -12,7 +12,7 @@ final class TrackerTypeViewController: UIViewController {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Создание трекера"
+        label.text = NSLocalizedString("tracker_type_view_controller.title", comment: "title Create tracker")
         label.font = UIFont.boldSystemFont(ofSize: 16)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -20,7 +20,10 @@ final class TrackerTypeViewController: UIViewController {
     
     private let habitButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Привычка", for: .normal)
+        button.setTitle(
+            NSLocalizedString("tracker_type_view_controller.button_habit", comment: "button Habit"),
+            for: .normal
+        )
         button.backgroundColor = .black
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
@@ -30,7 +33,10 @@ final class TrackerTypeViewController: UIViewController {
 
     private let irregularEventButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Нерегулярное событие", for: .normal)
+        button.setTitle(
+            NSLocalizedString("tracker_type_view_controller.button_irregular_event", comment: "button Irregular event"),
+            for: .normal
+        )
         button.backgroundColor = .black
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16

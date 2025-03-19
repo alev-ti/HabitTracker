@@ -8,11 +8,19 @@ final class MainTabBarController: UITabBarController {
     
     private func setupTabs() {
         let trackersVC = UINavigationController(rootViewController: TrackersViewController())
-        trackersVC.tabBarItem = UITabBarItem(title: "Трекеры", image: UIImage(systemName: "record.circle.fill"), tag: 0)
+        trackersVC.tabBarItem = UITabBarItem(
+            title: NSLocalizedString("main_tab_bar_controller.tab_title_trackers", comment: "tab title Trackers"),
+            image: UIImage(systemName: "record.circle.fill"),
+            tag: 0
+        )
         
         let statsVC = UIViewController()
         statsVC.view.backgroundColor = .white
-        statsVC.tabBarItem = UITabBarItem(title: "Статистика", image: UIImage(systemName: "hare.fill"), tag: 1)
+        statsVC.tabBarItem = UITabBarItem(
+            title: NSLocalizedString("main_tab_bar_controller.tab_title_statistics", comment: "tab title Statistics"),
+            image: UIImage(systemName: "hare.fill"),
+            tag: 1
+        )
         
         tabBar.layer.borderWidth = 0.5
         tabBar.layer.borderColor = Color.gray.cgColor

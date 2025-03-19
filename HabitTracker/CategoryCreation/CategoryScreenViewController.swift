@@ -18,7 +18,7 @@ final class CategoryScreenViewController: UIViewController {
         label.textAlignment = .center
         label.numberOfLines = 2
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.text = "Привычки и события \n можно объединить по смыслу"
+        label.text = NSLocalizedString("category_screen_view_controller.stub_text", comment: "stub text empty categories")
         
         return StubView(imageView: imageView, label: label)
     }()
@@ -136,7 +136,7 @@ extension CategoryScreenViewController: CreateNewCategoryDelegate {
 private extension CategoryScreenViewController {
     func setupUI() {
         view.backgroundColor = .white
-        self.title = "Категория"
+        self.title = NSLocalizedString("category_screen_view_controller.title", comment: "Category title")
         configureAddCategoryButton()
         configureTableView()
         configureStubView()
@@ -159,7 +159,7 @@ private extension CategoryScreenViewController {
     func configureAddCategoryButton() {
         addCategoryButton.translatesAutoresizingMaskIntoConstraints = false
         addCategoryButton.backgroundColor = Color.lightBlack
-        addCategoryButton.setTitle("Добавить категорию", for: .normal)
+        addCategoryButton.setTitle(NSLocalizedString("category_screen_view_controller.button_add_category", comment: "button add category"), for: .normal)
         addCategoryButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         addCategoryButton.layer.cornerRadius = 16
         addCategoryButton.clipsToBounds = true

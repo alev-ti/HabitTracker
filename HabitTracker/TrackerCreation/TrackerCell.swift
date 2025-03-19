@@ -124,22 +124,16 @@ final class TrackerCell: UICollectionViewCell {
         completionButton.backgroundColor = isCompleted ? tracker.color.withAlphaComponent(0.4) : tracker.color
         
         let isIrregularEvent = tracker.schedule.isEmpty
+        let daysString = String.localizedStringWithFormat(
+            NSLocalizedString("days_count", comment: "quantity of days"),
+            daysCount
+        )
         if isIrregularEvent {
-            daysCountLabel.text = isCompleted ? "Выполнено" : "Не выполнено"
+            daysCountLabel.text = isCompleted ? 
+            NSLocalizedString("tracker_cell.completed", comment: "completed event") :
+            NSLocalizedString("tracker_cell.not_completed", comment: "not completed event")
         } else {
-            daysCountLabel.text = "\(daysCount) \(dayString(for: daysCount))"
-        }
-    }
-    
-    private func dayString(for count: Int) -> String {
-        let remainder = count % 10
-        switch remainder {
-        case 1:
-            return "день"
-        case 2...4:
-            return "дня"
-        default:
-            return "дней"
+            daysCountLabel.text = daysString
         }
     }
     

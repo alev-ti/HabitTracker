@@ -8,7 +8,7 @@ final class IrregularEventCreationViewController: UIViewController {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Новое нерегулярное событие"
+        label.text = NSLocalizedString("irregular_event_creation_view_controller.title", comment: "title New irregular event")
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -16,7 +16,7 @@ final class IrregularEventCreationViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = NSLocalizedString("irregular_event_creation_view_controller.tracker_name_input_placeholder", comment: "placeholder Tracker's title")
         textField.backgroundColor = Color.lightGray
         textField.layer.cornerRadius = 16
         textField.font = UIFont.systemFont(ofSize: 16)
@@ -38,7 +38,7 @@ final class IrregularEventCreationViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("irregular_event_creation_view_controller.button_cancel", comment: "button cancel"), for: .normal)
         button.setTitleColor(Color.lightRed, for: .normal)
         button.layer.borderColor = Color.lightRed.cgColor
         button.layer.borderWidth = 1
@@ -50,7 +50,7 @@ final class IrregularEventCreationViewController: UIViewController {
     
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(NSLocalizedString("irregular_event_creation_view_controller.button_create", comment: "button create"), for: .normal)
         button.backgroundColor = Color.gray
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
@@ -68,7 +68,7 @@ final class IrregularEventCreationViewController: UIViewController {
         return label
     }()
     
-    private var tableViewData: [CellData] = [CellData(title: "Категория")]
+    private var tableViewData: [CellData] = [CellData(title: NSLocalizedString("irregular_event_creation_view_controller.category", comment: "category title"))]
     
     private lazy var trackerDetailCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -110,7 +110,7 @@ final class IrregularEventCreationViewController: UIViewController {
     
     private var trackerDetailCollectionViewData: [TrackerDetailCell] = [
         TrackerDetailCell(header: "Emoji", type: .emoji(TrackerDetails.emojis)),
-        TrackerDetailCell(header: "Цвет", type: .color(TrackerDetails.colors))
+        TrackerDetailCell(header: NSLocalizedString("irregular_event_creation_view_controller.color", comment: "color title"), type: .color(TrackerDetails.colors))
     ]
     
     private func validateForm() {

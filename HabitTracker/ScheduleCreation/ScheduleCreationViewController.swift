@@ -36,7 +36,8 @@ extension ScheduleCreationViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: ScheduleTableViewCell.reuseIdentifier, for: indexPath)
         
         guard let scheduleTableViewCell = cell as? ScheduleTableViewCell else { return UITableViewCell() }
-        scheduleTableViewCell.configureCell(nameLabel: tableViewData[indexPath.row].rawValue)
+        let day = tableViewData[indexPath.row]
+        scheduleTableViewCell.configureCell(nameLabel: day.localized)
         if selectedDays.contains(tableViewData[indexPath.row]) {
             scheduleTableViewCell.toggleOn()
         }
@@ -82,7 +83,7 @@ extension ScheduleCreationViewController: UITableViewDelegate {
 private extension ScheduleCreationViewController {
     private func setupUI() {
         view.backgroundColor = .white
-        self.title = "Расписание"
+        self.title = NSLocalizedString("schedule_creation_view_controller.title", comment: "Schedule title")
         configureReadyButton()
         configureTableView()
     }
@@ -90,7 +91,7 @@ private extension ScheduleCreationViewController {
     private func configureReadyButton() {
         readyButton.translatesAutoresizingMaskIntoConstraints = false
         readyButton.backgroundColor = Color.lightBlack
-        readyButton.setTitle("Готово", for: .normal)
+        readyButton.setTitle(NSLocalizedString("schedule_creation_view_controller.button_done", comment: "button done"), for: .normal)
         readyButton.setTitleColor(.white, for: .normal)
         readyButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         readyButton.layer.cornerRadius = 16
