@@ -46,3 +46,5 @@
 "page_model.onboarding_blue" = "Отслеживайте только то, что хотите";
 "page_model.onboarding_red" = "Даже если это не литры воды и йога";
 "onboarding_screen_view_controller.button_ok" = "Вот это технологии!";
+"statistics_view_controller.title_statistics" = "Статистика";
+"statistics_view_controller.stub_text" = "Анализировать пока нечего";

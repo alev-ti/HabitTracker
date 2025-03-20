@@ -14,8 +14,7 @@ final class MainTabBarController: UITabBarController {
             tag: 0
         )
         
-        let statsVC = UIViewController()
-        statsVC.view.backgroundColor = .white
+        let statsVC = UINavigationController(rootViewController: StatisticsViewController())
         statsVC.tabBarItem = UITabBarItem(
             title: NSLocalizedString("main_tab_bar_controller.tab_title_statistics", comment: "tab title Statistics"),
             image: UIImage(systemName: "hare.fill"),

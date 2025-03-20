@@ -54,8 +54,18 @@ final class TrackersViewController: UIViewController {
         return picker
     }()
     
-    var categories: [TrackerCategory] = []
-    var completedTrackers: Set<TrackerRecord> = []
+    private let statisticsService: StatisticsProviding = StatisticsProvider()
+    private var categories: [TrackerCategory] = [] {
+        didSet {
+            statisticsService.store(allTrackerCategories: categories, allTrackerRecords: completedTrackers)
+        }
+    }
+
+    private var completedTrackers: [TrackerRecord] = [] {
+        didSet {
+            statisticsService.store(allTrackerCategories: categories, allTrackerRecords: completedTrackers)
+        }
+    }
     private var currentDate: Date = Date()
     private var filteredCategories: [TrackerCategory] = []
     private var isSearching = false
@@ -67,7 +77,7 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         let trackerCategories = dataProvider.getAllTrackerCategory()
 
-        self.completedTrackers = Set(dataProvider.getAllRecords())
+        self.completedTrackers = dataProvider.getAllRecords()
         
         self.categories = trackerCategories ?? []
         searchBar.delegate = self
@@ -206,14 +216,16 @@ final class TrackersViewController: UIViewController {
         
         let record = TrackerRecord(id: tracker.id, date: today)
         
-        if let existingRecord = completedTrackers.first(where: { $0.id == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: today) }) {
-            completedTrackers.remove(existingRecord)
+        if let existingIndex = completedTrackers.firstIndex(where: {
+            $0.id == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: today)
+        }) {
+            completedTrackers.remove(at: existingIndex)
         } else {
             do {
                 try dataProvider.addNewRecord(tracker: tracker, trackerRecord: record)
-                completedTrackers.insert(record)
+                completedTrackers.append(record)
             } catch {
-                print("failed to add new record")
+                print("Failed to add new record: \(error)")
             }
         }
         collectionView.reloadData()

@@ -46,3 +46,5 @@
 "page_model.onboarding_blue" = "Track only what you want";
 "page_model.onboarding_red" = "Even if it's not liters of water and yoga";
 "onboarding_screen_view_controller.button_ok" = "Now that's technology!";
+"statistics_view_controller.title_statistics" = "Statistics";
+"statistics_view_controller.stub_text" = "There is nothing to analyse yet";
