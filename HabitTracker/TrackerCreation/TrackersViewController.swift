@@ -2,6 +2,8 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     
+    private let theme = Theme()
+    
     private lazy var stubView: StubView = {
         let imageView = UIImageView(image: UIImage(named: "stub_no_trackers"))
         imageView.contentMode = .scaleAspectFit
@@ -9,7 +11,7 @@ final class TrackersViewController: UIViewController {
         
         let label = UILabel()
         label.text = NSLocalizedString("trackers_view_controller.stub_text", comment: "stub text empty trackers")
-        label.textColor = Color.lightBlack
+        label.textColor = theme.textColor
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 12)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -40,7 +42,7 @@ final class TrackersViewController: UIViewController {
         layout.minimumLineSpacing = 10
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(TrackerCell.self, forCellWithReuseIdentifier: "TrackerCell")
-        collectionView.backgroundColor = .clear
+        collectionView.backgroundColor = theme.backgroundColor
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: -2)
         return collectionView
@@ -87,7 +89,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = theme.backgroundColor
         
         // Кнопка "+" слева
         navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -96,7 +98,7 @@ final class TrackersViewController: UIViewController {
             target: self,
             action: #selector(addTracker)
         )
-        navigationItem.leftBarButtonItem?.tintColor = Color.lightBlack
+        navigationItem.leftBarButtonItem?.tintColor = theme.textColor
         
         // DatePicker справа
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)

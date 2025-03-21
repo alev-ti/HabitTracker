@@ -5,6 +5,7 @@ protocol CreateNewCategoryDelegate: AnyObject {
 }
 
 final class CategoryScreenViewController: UIViewController {
+    private let theme = Theme()
     private let viewModel: CategoryViewModelProtocol
     
     private lazy var tableView = UITableView()
@@ -19,6 +20,7 @@ final class CategoryScreenViewController: UIViewController {
         label.numberOfLines = 2
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.text = NSLocalizedString("category_screen_view_controller.stub_text", comment: "stub text empty categories")
+        label.textColor = theme.textColor
         
         return StubView(imageView: imageView, label: label)
     }()

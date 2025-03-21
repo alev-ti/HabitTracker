@@ -1,6 +1,7 @@
 import UIKit
 
 final class ScheduleTableViewCell: UITableViewCell {
+    let theme = Theme()
     static let reuseIdentifier = "ScheduleTableViewCellReuseIdentifier"
     private lazy var nameLabel = UILabel()
     private lazy var toggle = UISwitch()
@@ -38,17 +39,16 @@ final class ScheduleTableViewCell: UITableViewCell {
 private extension ScheduleTableViewCell {
     func configureUI() {
         configureNameLabelAndToggle()
-        self.backgroundColor = Color.lightGray
+        self.backgroundColor = theme.tableCellColor
     }
     
     func configureNameLabelAndToggle() {
         toggle.translatesAutoresizingMaskIntoConstraints = false
         toggle.onTintColor = Color.blue
         
-        
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        nameLabel.textColor = .black
+        nameLabel.textColor = theme.textColor
         
         stackView = UIStackView(arrangedSubviews: [nameLabel, toggle])
         stackView.axis = .horizontal

@@ -4,6 +4,8 @@ final class ScheduleCreationViewController: UIViewController {
     
     var completionHandler: (([WeekDay]) -> Void)?
     
+    let theme = Theme()
+    
     private lazy var tableView = UITableView()
     private lazy var readyButton = UIButton(type: .system)
     weak var delegate: ScheduleSelectionDelegate?
@@ -82,17 +84,18 @@ extension ScheduleCreationViewController: UITableViewDelegate {
 
 private extension ScheduleCreationViewController {
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = theme.backgroundColor
         self.title = NSLocalizedString("schedule_creation_view_controller.title", comment: "Schedule title")
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: theme.textColor]
         configureReadyButton()
         configureTableView()
     }
     
     private func configureReadyButton() {
         readyButton.translatesAutoresizingMaskIntoConstraints = false
-        readyButton.backgroundColor = Color.lightBlack
+        readyButton.backgroundColor = theme.textColor
         readyButton.setTitle(NSLocalizedString("schedule_creation_view_controller.button_done", comment: "button done"), for: .normal)
-        readyButton.setTitleColor(.white, for: .normal)
+        readyButton.setTitleColor(theme.buttonTitleColor, for: .normal)
         readyButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         readyButton.layer.cornerRadius = 16
         readyButton.clipsToBounds = true

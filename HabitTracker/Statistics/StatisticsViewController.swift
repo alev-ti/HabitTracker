@@ -2,7 +2,9 @@ import UIKit
 
 class StatisticsViewController: UIViewController {
     
-    private let stubView = StatisticsViewController.createStubView()
+    private let theme = Theme()
+    
+    private lazy var stubView = createStubView()
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = NSLocalizedString("statistics_view_controller.title_statistics", comment: "title Statistics")
@@ -67,6 +69,7 @@ extension StatisticsViewController: UITableViewDelegate {
 private extension StatisticsViewController {
     
     func setupUI() {
+        view.backgroundColor = theme.backgroundColor
         view.addSubview(titleLabel)
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -104,14 +107,14 @@ private extension StatisticsViewController {
         ])
     }
     
-    static func createStubView() -> StubView {
+    func createStubView() -> StubView {
         let imageView = UIImageView(image: UIImage(named: "stub_no_statistics"))
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
         let label = UILabel()
         label.text = NSLocalizedString("statistics_view_controller.stub_text", comment: "stub text empty statistics")
-        label.textColor = Color.lightBlack
+        label.textColor = theme.textColor
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 12)
         label.translatesAutoresizingMaskIntoConstraints = false

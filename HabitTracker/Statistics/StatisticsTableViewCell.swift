@@ -2,6 +2,8 @@ import UIKit
 
 final class StatisticsTableViewCell: UITableViewCell {
     static let reuseIdentifier = "StatisticsTableViewCell"
+    
+    private let theme = Theme()
 
     private lazy var containerView = GradientBorderView()
     private lazy var countLabel: UILabel = createLabel(fontSize: 34, weight: .bold)
@@ -27,7 +29,7 @@ final class StatisticsTableViewCell: UITableViewCell {
 
 private extension StatisticsTableViewCell {
     func setupUI() {
-        backgroundColor = .white
+        backgroundColor = theme.backgroundColor
         setupContainerView()
         setupLabels()
     }
@@ -67,7 +69,7 @@ private extension StatisticsTableViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: fontSize, weight: weight)
-        label.textColor = Color.lightBlack
+        label.textColor = theme.textColor
         return label
     }
 }

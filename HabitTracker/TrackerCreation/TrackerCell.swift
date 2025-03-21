@@ -2,6 +2,8 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
     
+    private let theme = Theme()
+    
     private lazy var cardView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 16
@@ -49,7 +51,6 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
         label.textColor = .black
-        label.text = "0 дней"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -117,6 +118,7 @@ final class TrackerCell: UICollectionViewCell {
         emojiLabel.text = tracker.emoji
         nameLabel.text = tracker.name
         cardView.backgroundColor = tracker.color
+        daysCountLabel.textColor = theme.textColor
         self.completionHandler = completionHandler
         
         let image = isCompleted ? UIImage(systemName: "checkmark") : UIImage(systemName: "plus")

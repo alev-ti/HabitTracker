@@ -10,9 +10,12 @@ final class HabitCreationViewController: UIViewController {
     var onCancel: (() -> Void)?
     var onCreate: ((TrackerCategory) -> Void)?
     
+    let theme = Theme()
+    
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.text = NSLocalizedString("habit_creation_view_controller.title", comment: "title New habit")
+        label.textColor = theme.textColor
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -21,7 +24,7 @@ final class HabitCreationViewController: UIViewController {
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = NSLocalizedString("habit_creation_view_controller.tracker_name_input_placeholder", comment: "placeholder Tracker's title")
-        textField.backgroundColor = Color.lightGray
+        textField.backgroundColor = theme.tableCellColor
         textField.layer.cornerRadius = 16
         textField.font = UIFont.systemFont(ofSize: 16)
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -62,7 +65,7 @@ final class HabitCreationViewController: UIViewController {
             for: .normal
         )
         button.backgroundColor = Color.gray
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(theme.buttonTitleColor, for: .normal)
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.isEnabled = false
@@ -107,7 +110,7 @@ final class HabitCreationViewController: UIViewController {
         layout.minimumLineSpacing = 4
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = theme.backgroundColor
         collectionView.alwaysBounceVertical = true
         collectionView.allowsMultipleSelection = true
         collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: EmojiCell.identifier)
@@ -154,7 +157,7 @@ final class HabitCreationViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = theme.backgroundColor
         
         view.addSubview(titleLabel)
         view.addSubview(nameTextField)
@@ -240,7 +243,7 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = tableViewData[indexPath.row].title
         cell.accessoryType = .disclosureIndicator // Шеврон вправо
-        cell.backgroundColor = Color.lightGray
+        cell.backgroundColor = theme.tableCellColor
         cell.contentView.subviews.forEach { $0.removeFromSuperview() }
         
         let stackView = UIStackView()
@@ -252,7 +255,7 @@ extension HabitCreationViewController: UITableViewDelegate, UITableViewDataSourc
         let titleLabel = UILabel()
         titleLabel.text = tableViewData[indexPath.row].title
         titleLabel.font = UIFont.systemFont(ofSize: 16)
-        titleLabel.textColor = .black
+        titleLabel.textColor = theme.textColor
         
         stackView.addArrangedSubview(titleLabel)
         
@@ -369,6 +372,7 @@ extension HabitCreationViewController: UICollectionViewDelegate,UICollectionView
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "trackerDetailHeader", for: indexPath) as? TrackerDetailHeaderSupplementaryView
         view?.titleLabel.text = trackerDetailCollectionViewData[indexPath.section].header
+        view?.titleLabel.textColor = theme.textColor
         return view ?? UICollectionReusableView()
     }
     

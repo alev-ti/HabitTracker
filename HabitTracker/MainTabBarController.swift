@@ -1,6 +1,8 @@
 import UIKit
 
 final class MainTabBarController: UITabBarController {
+    private let theme = Theme()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabs()
@@ -22,7 +24,6 @@ final class MainTabBarController: UITabBarController {
         )
         
         tabBar.layer.borderWidth = 0.5
-        tabBar.layer.borderColor = Color.gray.cgColor
         tabBar.clipsToBounds = true
         
         viewControllers = [trackersVC, statsVC]
