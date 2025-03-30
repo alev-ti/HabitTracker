@@ -1,12 +1,12 @@
 import UIKit
 
+enum TrackerType {
+    case habit
+    case irregularEvent
+}
+
 // Экран выбора типа трекера
 final class TrackerTypeViewController: UIViewController {
-    
-    enum TrackerType {
-        case habit
-        case irregularEvent
-    }
     
     var onTrackerTypeSelected: ((TrackerType) -> Void)?
     

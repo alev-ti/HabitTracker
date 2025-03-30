@@ -1,3 +1,4 @@
+import UIKit
 import CoreData
 
 protocol DataProviderDelegate: AnyObject {
@@ -7,8 +8,12 @@ protocol DataProviderDelegate: AnyObject {
 protocol DataProviderProtocol {
     func addTrackerCategory(title: String)
     func addTracker(categoryTitle: String, tracker: Tracker)
+    func removeTracker(id: UUID)
+    func getAllTrackers() -> [Tracker]
     
     func getAllTrackerCategory() -> [TrackerCategory]?
+    func pinnedTracker(id: UUID)
+    func getCategoryTitleForTrackerId(id: UUID) -> String?
     
     func addNewRecord(tracker: Tracker, trackerRecord: TrackerRecord) throws
     func getAllRecords() -> [TrackerRecord]
@@ -56,34 +61,30 @@ final class DataProvider: NSObject {
         self.persistentContainer = container
         self.delegate = delegate
     }
-    
-    func saveContext() {
-        guard let context = persistentContainer?.viewContext else {
-            assertionFailure("persistentContainer is nil")
-            return
-        }
-        
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                context.rollback()
-                let nserror = error as NSError
-                assertionFailure("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
-        }
-    }
 }
 
+// MARK: - DataProviderProtocol
 
 extension DataProvider: DataProviderProtocol {
+    func getAllTrackers() -> [Tracker] {
+        return trackerStore.getAllTrackers() ?? []
+    }
+    
+    func removeTracker(id: UUID) {
+        trackerStore.removeTrackerForI(id: id)
+    }
+    
+    func getCategoryTitleForTrackerId(id: UUID) -> String? {
+        return trackerStore.getCategoryTitleForTrackerId(id: id)
+    }
+    
+    func pinnedTracker(id: UUID) {
+        trackerStore.pinnedTracker(id: id)
+    }
+    
     func addNewRecord(tracker: Tracker, trackerRecord: TrackerRecord) throws {
         if let trackerCoreDataIsExist = trackerStore.getTrackerCoreDataForId(id: tracker.id) {
-            do {
-                try trackerRecordStore.addNewRecord(trackerCoreData: trackerCoreDataIsExist, trackerRecord: trackerRecord)
-            } catch {
-                print("failed to addNewRecord")
-            }
+            try? trackerRecordStore.addNewRecord(trackerCoreData: trackerCoreDataIsExist, trackerRecord: trackerRecord)
         }
     }
     
@@ -102,27 +103,25 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func addTracker(categoryTitle: String, tracker: Tracker) {
-        guard let trackerCategoryStore = trackerCategoryStore, let context = context else {
-            assertionFailure("trackerCategoryStore or context is nil")
-            return
-        }
+        guard let trackerCategoryStore else { return }
         if let categoryIsExist = trackerCategoryStore.checkCategoryExistence(categoryTitle: categoryTitle) {
             do {
                 try trackerStore.addNewTracker(category: categoryIsExist, tracker: tracker)
-                print("Новая категория и трекер добавлены")
+                print("[addTracker]: Трекер добавлен в существующую категорию")
             } catch {
-                print("Не удалось добавить трекер к категории")
+                print("[addTracker]: Не удалось добавить трекер к категории")
             }
+            delegate?.didUpdate()
             return
         } else {
-            let trackerCategory = TrackerCategoryCoreData(context: context)
+            let trackerCategory = TrackerCategoryCoreData(context: self.context!)
             trackerCategory.title = categoryTitle
-            try? context.save()
+            try? context!.save()
             do {
                 try trackerStore.addNewTracker(category: trackerCategory, tracker: tracker)
-                print("Новая категория и трекер добавлены")
+                print("[addTracker]: Новая категория и трекер добавлены")
             } catch {
-                print("Не удалось добавить трекер к категории")
+                print("[addTracker]: Не удалось добавить трекер к категории")
             }
         }
     }
