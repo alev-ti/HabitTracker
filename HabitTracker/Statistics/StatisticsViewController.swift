@@ -5,13 +5,6 @@ class StatisticsViewController: UIViewController {
     private let theme = Theme()
     
     private lazy var stubView = createStubView()
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = NSLocalizedString("statistics_view_controller.title_statistics", comment: "title Statistics")
-        label.font = UIFont.boldSystemFont(ofSize: 34)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -70,12 +63,6 @@ private extension StatisticsViewController {
     
     func setupUI() {
         view.backgroundColor = theme.backgroundColor
-        view.addSubview(titleLabel)
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16)
-        ])
-        
         configureTableView()
         configureStubView()
     }

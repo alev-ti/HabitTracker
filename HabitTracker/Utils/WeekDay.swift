@@ -1,6 +1,6 @@
 import Foundation
 
-enum WeekDay: String, CaseIterable, Codable {
+enum WeekDay: String, CaseIterable, Codable, Comparable {
     
     case Monday = "Monday"
     case Tuesday = "Tuesday"
@@ -12,6 +12,22 @@ enum WeekDay: String, CaseIterable, Codable {
     
     init?(from string: String) {
         self.init(rawValue: string)
+    }
+    
+    static func < (lhs: WeekDay, rhs: WeekDay) -> Bool {
+        return order(lhs) < order(rhs)
+    }
+    
+    private static func order(_ day: WeekDay) -> Int {
+        switch day {
+        case .Monday: return 1
+        case .Tuesday: return 2
+        case .Wednesday: return 3
+        case .Thursday: return 4
+        case .Friday: return 5
+        case .Saturday: return 6
+        case .Sunday: return 7
+        }
     }
 
     var localized: String {

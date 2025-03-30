@@ -1,6 +1,14 @@
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func cellButtonDidTapped(_ cell: TrackerCell)
+}
+
 final class TrackerCell: UICollectionViewCell {
+    
+    static let identifier: String = "TrackerCell"
+    
+    weak var delegate: TrackerCellDelegate?
     
     private let theme = Theme()
     
@@ -50,12 +58,18 @@ final class TrackerCell: UICollectionViewCell {
     private lazy var daysCountLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .black
+        label.textColor = theme.textColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private var completionHandler: (() -> Void)?
+    private lazy var pinSquare: UIImageView = {
+        let pinSquare = UIImageView()
+        pinSquare.contentMode = .center
+        pinSquare.image = UIImage(named: "pin")
+        pinSquare.translatesAutoresizingMaskIntoConstraints = false
+        return pinSquare
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -68,13 +82,14 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func setupUI() {
+        self.layer.cornerRadius = 16
         contentView.addSubview(cardView)
         contentView.addSubview(completionButton)
         contentView.addSubview(daysCountLabel)
-        
         cardView.addSubview(emojiBackgroundView)
         emojiBackgroundView.addSubview(emojiLabel)
         cardView.addSubview(nameLabel)
+        contentView.addSubview(pinSquare)
         
         NSLayoutConstraint.activate([
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -103,7 +118,12 @@ final class TrackerCell: UICollectionViewCell {
             completionButton.heightAnchor.constraint(equalToConstant: 34),
             
             daysCountLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            daysCountLabel.centerYAnchor.constraint(equalTo: completionButton.centerYAnchor)
+            daysCountLabel.centerYAnchor.constraint(equalTo: completionButton.centerYAnchor),
+            
+            pinSquare.heightAnchor.constraint(equalToConstant: 24),
+            pinSquare.widthAnchor.constraint(equalToConstant: 24),
+            pinSquare.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -8),
+            pinSquare.centerYAnchor.constraint(equalTo: emojiLabel.centerYAnchor)
         ])
         
         // Делаем фон круглым после установки констрейнтов
@@ -112,34 +132,48 @@ final class TrackerCell: UICollectionViewCell {
 
         completionButton.addTarget(self, action: #selector(completionButtonTapped), for: .touchUpInside)
     }
-
     
-    func configure(with tracker: Tracker, isCompleted: Bool, daysCount: Int, completionHandler: @escaping () -> Void) {
-        emojiLabel.text = tracker.emoji
-        nameLabel.text = tracker.name
-        cardView.backgroundColor = tracker.color
-        daysCountLabel.textColor = theme.textColor
-        self.completionHandler = completionHandler
-        
-        let image = isCompleted ? UIImage(systemName: "checkmark") : UIImage(systemName: "plus")
-        completionButton.setImage(image, for: .normal)
-        completionButton.backgroundColor = isCompleted ? tracker.color.withAlphaComponent(0.4) : tracker.color
-        
-        let isIrregularEvent = tracker.schedule.isEmpty
-        let daysString = String.localizedStringWithFormat(
-            NSLocalizedString("days_count", comment: "quantity of days"),
-            daysCount
-        )
-        if isIrregularEvent {
-            daysCountLabel.text = isCompleted ? 
-            NSLocalizedString("tracker_cell.completed", comment: "completed event") :
-            NSLocalizedString("tracker_cell.not_completed", comment: "not completed event")
-        } else {
-            daysCountLabel.text = daysString
+    func configure(name: String, emoji: String, color: UIColor, delegate: TrackerCellDelegate, isPinned: Bool) {
+        self.nameLabel.text = name
+        self.emojiLabel.text = emoji
+        self.cardView.backgroundColor = color
+        self.emojiBackgroundView.backgroundColor = .white.withAlphaComponent(0.3)
+        self.completionButton.backgroundColor = color
+        self.delegate = delegate
+        self.pinSquare.image = isPinned ? UIImage(named: "pin") : nil
+    }
+    
+    func changeCompletionStatus(days: Int, isCompleted: Bool, trackerType: TrackerType) {
+        switch trackerType {
+            
+        case .habit:
+            let daysString = String.localizedStringWithFormat(
+                NSLocalizedString("days_count", comment: "quantity of days"),
+                days)
+            
+            if isCompleted {
+                daysCountLabel.text = daysString
+                completionButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                completionButton.backgroundColor = completionButton.backgroundColor?.withAlphaComponent(0.3)
+            } else {
+                daysCountLabel.text = daysString
+                completionButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                completionButton.backgroundColor = completionButton.backgroundColor?.withAlphaComponent(1)
+            }
+            case .irregularEvent:
+            if isCompleted || days > 0 {
+                daysCountLabel.text = NSLocalizedString("tracker_cell.completed", comment: "completed event")
+                completionButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                completionButton.backgroundColor = completionButton.backgroundColor?.withAlphaComponent(0.3)
+            } else {
+                daysCountLabel.text = NSLocalizedString("tracker_cell.not_completed", comment: "not completed event")
+                completionButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                completionButton.backgroundColor = completionButton.backgroundColor?.withAlphaComponent(1)
+            }
         }
     }
     
-    @objc private func completionButtonTapped() {
-        completionHandler?()
+    @objc func completionButtonTapped() {
+        delegate?.cellButtonDidTapped(self)
     }
 }

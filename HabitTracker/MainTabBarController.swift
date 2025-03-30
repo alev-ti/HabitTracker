@@ -9,23 +9,43 @@ final class MainTabBarController: UITabBarController {
     }
     
     private func setupTabs() {
-        let trackersVC = UINavigationController(rootViewController: TrackersViewController())
-        trackersVC.tabBarItem = UITabBarItem(
-            title: NSLocalizedString("main_tab_bar_controller.tab_title_trackers", comment: "tab title Trackers"),
-            image: UIImage(systemName: "record.circle.fill"),
-            tag: 0
-        )
+        let trackersVC = TrackersViewController()
+        let statsVC = StatisticsViewController()
         
-        let statsVC = UINavigationController(rootViewController: StatisticsViewController())
-        statsVC.tabBarItem = UITabBarItem(
-            title: NSLocalizedString("main_tab_bar_controller.tab_title_statistics", comment: "tab title Statistics"),
-            image: UIImage(systemName: "hare.fill"),
-            tag: 1
-        )
+        let trackersText = NSLocalizedString("main_tab_bar_controller.tab_title_trackers", comment: "tab title Trackers")
+        let statisticsText = NSLocalizedString("main_tab_bar_controller.tab_title_statistics", comment: "tab title Statistics")
         
+        let trackersTabItem = setupUI(rootViewController: trackersVC, title: trackersText, image: UIImage(systemName: "record.circle.fill") ?? UIImage())
+        let statisticsTabItem = setupUI(rootViewController: statsVC, title: statisticsText, image: UIImage(systemName: "hare.fill") ?? UIImage())
+        tabBar.tintColor = Color.blue
+        tabBar.unselectedItemTintColor = Color.gray
+        tabBar.barTintColor = theme.backgroundColor
         tabBar.layer.borderWidth = 0.5
-        tabBar.clipsToBounds = true
+        setViewControllers([trackersTabItem, statisticsTabItem], animated: false)
+    }
+    
+    private func setupUI(rootViewController: UIViewController, title: String, image: UIImage) -> UINavigationController {
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.navigationBar.prefersLargeTitles = true
+        navigationController.navigationBar.barTintColor = theme.backgroundColor
+        navigationController.navigationBar.backgroundColor = theme.backgroundColor
+        navigationController.navigationItem.largeTitleDisplayMode = .automatic
+        navigationController.viewControllers.first?.navigationItem.title = title
         
-        viewControllers = [trackersVC, statsVC]
+        let titleFont = UIFont.systemFont(ofSize: 34, weight: .bold)
+        navigationController.navigationBar.largeTitleTextAttributes = [
+            NSAttributedString.Key.font: titleFont,
+            NSAttributedString.Key.foregroundColor: theme.textColor
+        ]
+        
+        let tabFont = UIFont.systemFont(ofSize: 17, weight: .semibold)
+            navigationController.navigationBar.titleTextAttributes = [
+                NSAttributedString.Key.font: tabFont,
+                NSAttributedString.Key.foregroundColor: theme.textColor
+            ]
+        
+        navigationController.tabBarItem.title = title
+        navigationController.tabBarItem.image = image
+        return navigationController
     }
 }
