@@ -1,8 +1,14 @@
 "main_tab_bar_controller.tab_title_trackers" = "Trackers";
 "main_tab_bar_controller.tab_title_statistics" = "Statistics";
-"trackers_view_controller.title_trackers" = "Trackers";
 "trackers_view_controller.stub_text" = "What will we track?";
+"trackers_view_controller.stub_text_no_results" = "Nothing found";
 "trackers_view_controller.search_input_placeholder" = "Search";
+"trackers_view_controller.button_filters" = "Filters";
+"trackers_view_controller.tracker_menu_pin" = "Pin";
+"trackers_view_controller.tracker_menu_unpin" = "Unpin";
+"trackers_view_controller.tracker_menu_edit" = "Edit";
+"trackers_view_controller.tracker_menu_delete" = "Delete";
+"trackers_view_controller.pinned_trackers_title" = "Pinned";
 "tracker_type_view_controller.title" = "Create tracker";
 "tracker_type_view_controller.button_habit" = "Habit";
 "tracker_type_view_controller.button_irregular_event" = "Irregular event";
@@ -46,5 +52,4 @@
 "page_model.onboarding_blue" = "Track only what you want";
 "page_model.onboarding_red" = "Even if it's not liters of water and yoga";
 "onboarding_screen_view_controller.button_ok" = "Now that's technology!";
-"statistics_view_controller.title_statistics" = "Statistics";
 "statistics_view_controller.stub_text" = "There is nothing to analyse yet";

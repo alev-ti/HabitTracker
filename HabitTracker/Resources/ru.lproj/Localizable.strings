@@ -1,8 +1,14 @@
 "main_tab_bar_controller.tab_title_trackers" = "Трекеры";
 "main_tab_bar_controller.tab_title_statistics" = "Статистика";
-"trackers_view_controller.title_trackers" = "Трекеры";
 "trackers_view_controller.stub_text" = "Что будем отслеживать?";
+"trackers_view_controller.stub_text_no_results" = "Ничего не найдено";
 "trackers_view_controller.search_input_placeholder" = "Поиск";
+"trackers_view_controller.button_filters" = "Фильтры";
+"trackers_view_controller.tracker_menu_pin" = "Закрепить";
+"trackers_view_controller.tracker_menu_unpin" = "Открепить";
+"trackers_view_controller.tracker_menu_edit" = "Редактировать";
+"trackers_view_controller.tracker_menu_delete" = "Удалить";
+"trackers_view_controller.pinned_trackers_title" = "Закреплённые";
 "tracker_type_view_controller.title" = "Создание трекера";
 "tracker_type_view_controller.button_habit" = "Привычка";
 "tracker_type_view_controller.button_irregular_event" = "Нерегулярное событие";
@@ -46,5 +52,4 @@
 "page_model.onboarding_blue" = "Отслеживайте только то, что хотите";
 "page_model.onboarding_red" = "Даже если это не литры воды и йога";
 "onboarding_screen_view_controller.button_ok" = "Вот это технологии!";
-"statistics_view_controller.title_statistics" = "Статистика";
 "statistics_view_controller.stub_text" = "Анализировать пока нечего";
