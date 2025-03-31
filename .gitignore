@@ -2,3 +2,6 @@ HabitTracker.xcodeproj/.idea/
 HabitTracker.xcodeproj/xcuserdata/**
 HabitTrackerTests/__Snapshots__/
 *.xcodeproj/*
+Pods/
+HabitTracker.xcworkspace/
+Podfile.lock

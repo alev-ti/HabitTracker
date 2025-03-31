@@ -1,6 +1,5 @@
 import UIKit
 
-
 protocol HabitCreationDelegate: AnyObject {
     func didCreateTracker(_ trackerCategory: TrackerCategory)
 }
@@ -120,6 +119,28 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         setupUI()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.reportEvent(
+            name: "open_main_screen",
+            params: [
+                "event": "open",
+                "screen": "Main"
+            ]
+        )
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.reportEvent(
+            name: "close_main_screen",
+            params: [
+                "event": "close",
+                "screen": "Main"
+            ]
+        )
+    }
+    
     private func setupUI() {
         view.backgroundColor = theme.backgroundColor
         
@@ -191,6 +212,14 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
             }
         }
         present(trackerTypeVC, animated: true)
+        AnalyticsService.reportEvent(
+            name: "click_add_tracker",
+            params: [
+                "event": "click",
+                "screen": "Main",
+                "item": "add_track"
+            ]
+        )
     }
     
     private func showHabitCreationScreen() {
@@ -327,6 +356,14 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         ]
         navigationController.navigationBar.titleTextAttributes = textAttributes
         present(navigationController, animated: true)
+        AnalyticsService.reportEvent(
+            name: "click_filter_btn",
+            params: [
+                "event": "click",
+                "screen": "Main",
+                "item": "filter"
+            ]
+        )
     }
     
     private func updateFilterButtonVisibility(for currentDate: Date) {
@@ -383,6 +420,15 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         let currentDateIsNotFuture = Calendar.current.compare(Date(), to: currentDate, toGranularity: .day) != .orderedAscending
         guard let indexPath = collectionView.indexPath(for: cell),
               currentDateIsNotFuture else { return }
+        
+        AnalyticsService.reportEvent(
+            name: "click_complete_tracker",
+            params: [
+                "event": "click",
+                "screen": "Main",
+                "item": "track"
+            ]
+        )
         
         let currentTracker = filteredCategories[indexPath.section].trackers[indexPath.row]
         let currentTrackerID = filteredCategories[indexPath.section].trackers[indexPath.row].id
@@ -513,6 +559,15 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
                     EditHabitViewController(delegate: self, trackerCategory: currentTrackerCategory, daysCompleted: getTrackerCompletionsQuantity(for: currentTracker.id)) : EditIrregularEventViewController(delegate: self, trackerCategory: currentTrackerCategory, isTrackerCompletedToday: checkCompletionCurrentTrackerToday(id: currentTracker.id))
                     let navigationController = UINavigationController(rootViewController: vc)
                     present(navigationController, animated: true)
+                    
+                    AnalyticsService.reportEvent(
+                        name: "click_edit_tracker_btn",
+                        params: [
+                            "event": "click",
+                            "screen": "Main",
+                            "item": "edit"
+                        ]
+                    )
                 },
                 
                 UIAction(title: deleteButtonText, attributes: .destructive) { [weak self] _ in
@@ -526,6 +581,14 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
                     alert.addAction(deleteAction)
                     alert.addAction(cancelAction)
                     self.present(alert, animated: true, completion: nil)
+                    AnalyticsService.reportEvent(
+                        name: "click_delete_tracker_btn",
+                        params: [
+                            "event": "click",
+                            "screen": "Main",
+                            "item": "delete"
+                        ]
+                    )
                 }
             ])
         })
