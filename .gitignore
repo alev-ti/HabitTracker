@@ -1,2 +1,4 @@
 HabitTracker.xcodeproj/.idea/
 HabitTracker.xcodeproj/xcuserdata/**
+HabitTrackerTests/__Snapshots__/
+*.xcodeproj/*
