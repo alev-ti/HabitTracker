@@ -67,7 +67,7 @@ final class DataProvider: NSObject {
 
 extension DataProvider: DataProviderProtocol {
     func getAllTrackers() -> [Tracker] {
-        return trackerStore.getAllTrackers() ?? []
+        trackerStore.getAllTrackers() ?? []
     }
     
     func removeTracker(id: UUID) {
@@ -103,26 +103,28 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func addTracker(categoryTitle: String, tracker: Tracker) {
-        guard let trackerCategoryStore else { return }
+        guard let trackerCategoryStore, let context = self.context else { return }
+
         if let categoryIsExist = trackerCategoryStore.checkCategoryExistence(categoryTitle: categoryTitle) {
             do {
                 try trackerStore.addNewTracker(category: categoryIsExist, tracker: tracker)
                 print("[addTracker]: Трекер добавлен в существующую категорию")
             } catch {
-                print("[addTracker]: Не удалось добавить трекер к категории")
+                print("[addTracker]: Ошибка: \(error.localizedDescription)")
             }
             delegate?.didUpdate()
             return
-        } else {
-            let trackerCategory = TrackerCategoryCoreData(context: self.context!)
-            trackerCategory.title = categoryTitle
-            try? context!.save()
-            do {
-                try trackerStore.addNewTracker(category: trackerCategory, tracker: tracker)
-                print("[addTracker]: Новая категория и трекер добавлены")
-            } catch {
-                print("[addTracker]: Не удалось добавить трекер к категории")
-            }
+        }
+
+        let trackerCategory = TrackerCategoryCoreData(context: context)
+        trackerCategory.title = categoryTitle
+
+        do {
+            try context.save()
+            try trackerStore.addNewTracker(category: trackerCategory, tracker: tracker)
+            print("[addTracker]: Новая категория и трекер добавлены")
+        } catch {
+            print("[addTracker]: Ошибка сохранения: \(error.localizedDescription)")
         }
     }
     
