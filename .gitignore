@@ -1,5 +1,5 @@
 HabitTracker.xcodeproj/.idea/
-HabitTracker.xcodeproj/xcuserdata/**
+HabitTracker.xcodeproj/project.xcworkspace/xcuserdata/
 HabitTrackerTests/__Snapshots__/
 *.xcodeproj/*
 Pods/
