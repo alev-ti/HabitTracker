@@ -2,6 +2,17 @@ import UIKit
 
 final class MainTabBarController: UITabBarController {
     private let theme = Theme.shared
+    private let viewModel: StatisticsViewModel
+    
+    init(statisticsService: StatisticsProviding) {
+        self.viewModel = StatisticsViewModel(statisticsService: statisticsService)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        assertionFailure("init(coder:) has not been implemented")
+        return nil
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -10,7 +21,7 @@ final class MainTabBarController: UITabBarController {
     
     private func setupTabs() {
         let trackersVC = TrackersViewController()
-        let statsVC = StatisticsViewController()
+        let statsVC = StatisticsViewController(viewModel: viewModel)
         
         let trackersText = NSLocalizedString("main_tab_bar_controller.tab_title_trackers", comment: "tab title Trackers")
         let statisticsText = NSLocalizedString("main_tab_bar_controller.tab_title_statistics", comment: "tab title Statistics")

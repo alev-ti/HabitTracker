@@ -2,10 +2,11 @@ import Foundation
 
 final class StatisticsViewModel {
     
-    private let statisticsService: StatisticsProviding = StatisticsProvider()
+    private let statisticsService: StatisticsProviding
     private(set) var cellData: [CellData] = []
     
-    init() {
+    init(statisticsService: StatisticsProviding) {
+        self.statisticsService = statisticsService
         reloadAllData()
     }
     
@@ -14,7 +15,7 @@ final class StatisticsViewModel {
             cellData = []
             return
         }
-
+        
         cellData = [
             CellData(title: "\(statisticsService.bestPeriod)", text: "Лучший период"),
             CellData(title: "\(statisticsService.perfectDays)", text: "Идеальные дни"),

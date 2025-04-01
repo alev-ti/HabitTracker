@@ -2,13 +2,13 @@ import Foundation
 
 enum WeekDay: String, CaseIterable, Codable, Comparable {
     
-    case Monday = "Monday"
-    case Tuesday = "Tuesday"
-    case Wednesday = "Wednesday"
-    case Thursday = "Thursday"
-    case Friday = "Friday"
-    case Saturday = "Saturday"
-    case Sunday = "Sunday"
+    case monday = "Monday"
+    case tuesday = "Tuesday"
+    case wednesday = "Wednesday"
+    case thursday = "Thursday"
+    case friday = "Friday"
+    case saturday = "Saturday"
+    case sunday = "Sunday"
     
     init?(from string: String) {
         self.init(rawValue: string)
@@ -20,50 +20,50 @@ enum WeekDay: String, CaseIterable, Codable, Comparable {
     
     private static func order(_ day: WeekDay) -> Int {
         switch day {
-        case .Monday: return 1
-        case .Tuesday: return 2
-        case .Wednesday: return 3
-        case .Thursday: return 4
-        case .Friday: return 5
-        case .Saturday: return 6
-        case .Sunday: return 7
+        case .monday: return 1
+        case .tuesday: return 2
+        case .wednesday: return 3
+        case .thursday: return 4
+        case .friday: return 5
+        case .saturday: return 6
+        case .sunday: return 7
         }
     }
 
     var localized: String {
         switch self {
-        case .Monday:
+        case .monday:
             return NSLocalizedString("schedule.monday", comment: "monday")
-        case .Tuesday:
+        case .tuesday:
             return NSLocalizedString("schedule.tuesday", comment: "tuesday")
-        case .Wednesday:
+        case .wednesday:
             return NSLocalizedString("schedule.wednesday", comment: "wednesday")
-        case .Thursday:
+        case .thursday:
             return NSLocalizedString("schedule.thursday", comment: "thursday")
-        case .Friday:
+        case .friday:
             return NSLocalizedString("schedule.friday", comment: "friday")
-        case .Saturday:
+        case .saturday:
             return NSLocalizedString("schedule.saturday", comment: "saturday")
-        case .Sunday:
+        case .sunday:
             return NSLocalizedString("schedule.sunday", comment: "sunday")
         }
     }
 
     func getShortName() -> String {
         switch self {
-        case .Monday:
+        case .monday:
             return NSLocalizedString("schedule.monday_short", comment: "Mon")
-        case .Tuesday:
+        case .tuesday:
             return NSLocalizedString("schedule.tuesday_short", comment: "Tue")
-        case .Wednesday:
+        case .wednesday:
             return NSLocalizedString("schedule.wednesday_short", comment: "Wed")
-        case .Thursday:
+        case .thursday:
             return NSLocalizedString("schedule.thursday_short", comment: "Thu")
-        case .Friday:
+        case .friday:
             return NSLocalizedString("schedule.friday_short", comment: "Fri")
-        case .Saturday:
+        case .saturday:
             return NSLocalizedString("schedule.saturday_short", comment: "Sat")
-        case .Sunday:
+        case .sunday:
             return NSLocalizedString("schedule.sunday_short", comment: "Sun")
         }
     }

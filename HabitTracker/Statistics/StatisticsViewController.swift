@@ -1,6 +1,19 @@
 import UIKit
 
-class StatisticsViewController: UIViewController {
+final class StatisticsViewController: UIViewController {
+    
+    private let viewModel: StatisticsViewModel
+    
+    init(viewModel: StatisticsViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        let service = StatisticsProvider()
+        self.viewModel = StatisticsViewModel(statisticsService: service)
+        super.init(coder: coder)
+    }
     
     private let theme = Theme.shared
     
@@ -15,8 +28,6 @@ class StatisticsViewController: UIViewController {
         tableView.allowsSelection = false
         return tableView
     }()
-    
-    private let viewModel = StatisticsViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -165,7 +165,7 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         view.addSubview(stubView.label)
         view.addSubview(stubNoResultsView.imageView)
         view.addSubview(stubNoResultsView.label)
-
+        
         // Констрейнты
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -196,7 +196,7 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         ])
     }
     
-    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+    @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         self.currentDate = sender.date
         updateVisibleCategories(from: currentDate)
     }
@@ -227,7 +227,7 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         habitVC.delegate = self
         let navVC = UINavigationController(rootViewController: habitVC)
         navVC.modalPresentationStyle = .pageSheet
-
+        
         let textAttributes: [NSAttributedString.Key: Any] = [
             .foregroundColor: theme.textColor,
             .font: UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -236,7 +236,7 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         navVC.navigationBar.barTintColor = theme.backgroundColor
         navVC.navigationBar.backgroundColor = theme.backgroundColor
         habitVC.navigationItem.title = NSLocalizedString("habit_creation_view_controller.title", comment: "title New habit")
-
+        
         present(navVC, animated: true)
     }
     
@@ -267,7 +267,7 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         
         var filteredCategories: [TrackerCategory] = categories.compactMap { category in
             let filteredTrackers = category.trackers.filter { tracker in
-
+                
                 if tracker.isPinned {
                     pinnedTrackers.append(tracker)
                     return false
@@ -285,25 +285,27 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
                 }()
                 
                 switch filterState {
-                case 2:
-                    return (isScheduledToday || isOneTimeTracker) && isCompletedToday
-                    
-                case 3:
-                    if isScheduledToday {
-                        return !isCompletedToday
-                    } else if isOneTimeTracker {
-                        return !completedTrackers.contains(where: { $0.id == tracker.id })
-                    }
-                    return false
-                    
-                default:
-                    if isScheduledToday {
-                        return true
-                    } else if isOneTimeTracker {
-                        let completionDate = completedTrackers.first { $0.id == tracker.id }?.date
-                        return completionDate == nil || Calendar.current.startOfDay(for: completionDate!) == currentDayStart
-                    }
-                    return false
+                    case 2:
+                        return (isScheduledToday || isOneTimeTracker) && isCompletedToday
+                        
+                    case 3:
+                        if isScheduledToday {
+                            return !isCompletedToday
+                        } else if isOneTimeTracker {
+                            return !completedTrackers.contains(where: { $0.id == tracker.id })
+                        }
+                        return false
+                        
+                    default:
+                        if isScheduledToday {
+                            return true
+                        } else if isOneTimeTracker {
+                            if let completionDate = completedTrackers.first(where: { $0.id == tracker.id })?.date {
+                                return Calendar.current.startOfDay(for: completionDate) == currentDayStart
+                            }
+                            return true
+                        }
+                        return false
                 }
             }
             
@@ -332,19 +334,15 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         }
     }
     
-    func reloadData() {
-        collectionView.reloadData()
-    }
-    
-    func filtersDidUpdate(value: Int) {
-        if (value == 1) {
+    private func filtersDidUpdate(value: Int) {
+        if value == 1 {
             currentDate = Date()
             datePicker.date = currentDate
         }
         updateVisibleCategories(from: currentDate)
     }
     
-    @objc func filterButtonTapped() {
+    @objc private func filterButtonTapped() {
         let filterViewController = FilterViewController { [weak self] value in
             self?.filtersDidUpdate(value: value)
         }
@@ -388,7 +386,7 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         filterButton.isHidden = trackers.isEmpty
     }
     
-    func getDayOfWeek(from date: Date) -> String {
+    private func getDayOfWeek(from date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.locale = Locale(identifier: "en_En")
         dateFormatter.dateFormat = "EEEE"
@@ -400,14 +398,14 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
     func cellButtonDidTapped(_ cell: TrackerCell) {
         completedTrackers = dataProvider.getAllRecords()
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
-
+        
         let isIrregularEvent = filteredCategories[indexPath.section].trackers[indexPath.row].schedule.isEmpty
         if isIrregularEvent, getTrackerCompletionsQuantity(for: filteredCategories[indexPath.section].trackers[indexPath.row].id) > 0 {
             removeCompletedTracker(cell)
             updateVisibleCategories(from: currentDate)
             return
         }
-
+        
         if !checkCompletionCurrentTrackerToday(id: filteredCategories[indexPath.section].trackers[indexPath.row].id) {
             completeTracker(cell)
         } else {
@@ -416,7 +414,7 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
         updateVisibleCategories(from: currentDate)
     }
     
-    func completeTracker(_ cell: TrackerCell) {
+    private func completeTracker(_ cell: TrackerCell) {
         let currentDateIsNotFuture = Calendar.current.compare(Date(), to: currentDate, toGranularity: .day) != .orderedAscending
         guard let indexPath = collectionView.indexPath(for: cell),
               currentDateIsNotFuture else { return }
@@ -447,9 +445,9 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
             print("[completeTracker]: Не удалось сохранить TrackerRecord")
         }
     }
-
     
-    func removeCompletedTracker(_ cell: TrackerCell) {
+    
+    private func removeCompletedTracker(_ cell: TrackerCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else { return }
         
         let tracker = filteredCategories[indexPath.section].trackers[indexPath.row]
@@ -469,11 +467,11 @@ final class TrackersViewController: UIViewController, TrackerCellDelegate {
             print("[removeCompletedTracker]: Не удалось удалить TrackerRecord")
         }
     }
-
+    
     private func getTrackerCompletionsQuantity(for trackerId: UUID) -> Int {
         completedTrackers.filter { $0.id == trackerId }.count
     }
-
+    
     private func checkCompletionCurrentTrackerToday(id: UUID) -> Bool {
         completedTrackers.contains {
             $0.id == id && Calendar.current.isDate(currentDate, inSameDayAs: $0.date)
@@ -514,7 +512,7 @@ extension TrackersViewController: UICollectionViewDelegate, UICollectionViewData
             
             cell?.changeCompletionStatus(days: completionsCount, isCompleted: isTrackerCompletedToday, trackerType: trackerType)
         }
-
+        
         return cell ?? UICollectionViewCell()
     }
     
