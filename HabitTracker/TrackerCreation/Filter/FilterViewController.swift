@@ -4,7 +4,7 @@ final class FilterViewController: UIViewController {
     
     private lazy var tableView = UITableView()
     
-    private let theme = Theme()
+    private let theme = Theme.shared
     private var viewModel = FilterSelectionViewModel()
     var completionHandler: (Int) -> Void
     

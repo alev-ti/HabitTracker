@@ -115,7 +115,7 @@ class IrregularEventCreationViewController: UIViewController {
     
     weak var delegate: HabitCreationDelegate?
     
-    let theme = Theme()
+    private let theme = Theme.shared
     
     let viewModel = CategoryViewModel()
     

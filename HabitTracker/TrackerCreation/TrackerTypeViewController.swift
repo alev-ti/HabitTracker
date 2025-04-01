@@ -10,7 +10,7 @@ final class TrackerTypeViewController: UIViewController {
     
     var onTrackerTypeSelected: ((TrackerType) -> Void)?
     
-    let theme = Theme()
+    private let theme = Theme.shared
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()

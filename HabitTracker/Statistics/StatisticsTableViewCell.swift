@@ -3,7 +3,7 @@ import UIKit
 final class StatisticsTableViewCell: UITableViewCell {
     static let reuseIdentifier = "StatisticsTableViewCell"
     
-    private let theme = Theme()
+    private let theme = Theme.shared
 
     private lazy var containerView = GradientBorderView()
     private lazy var countLabel: UILabel = createLabel(fontSize: 34, weight: .bold)

@@ -6,7 +6,7 @@ protocol HabitCreationDelegate: AnyObject {
 
 final class TrackersViewController: UIViewController, TrackerCellDelegate {
     
-    private let theme = Theme()
+    private let theme = Theme.shared
     
     private lazy var stubView: StubView = {
         let imageView = UIImageView(image: UIImage(named: "stub_no_trackers"))

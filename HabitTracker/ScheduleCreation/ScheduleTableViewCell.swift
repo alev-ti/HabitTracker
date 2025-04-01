@@ -1,7 +1,7 @@
 import UIKit
 
 final class ScheduleTableViewCell: UITableViewCell {
-    let theme = Theme()
+    private let theme = Theme.shared
     static let reuseIdentifier = "ScheduleTableViewCellReuseIdentifier"
     private lazy var nameLabel = UILabel()
     private lazy var toggle = UISwitch()

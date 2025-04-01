@@ -10,7 +10,7 @@ final class TrackerCell: UICollectionViewCell {
     
     weak var delegate: TrackerCellDelegate?
     
-    private let theme = Theme()
+    private let theme = Theme.shared
     
     private lazy var cardView: UIView = {
         let view = UIView()

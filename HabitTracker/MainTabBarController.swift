@@ -1,7 +1,7 @@
 import UIKit
 
 final class MainTabBarController: UITabBarController {
-    private let theme = Theme()
+    private let theme = Theme.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()

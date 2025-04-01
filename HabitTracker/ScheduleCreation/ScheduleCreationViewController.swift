@@ -4,7 +4,7 @@ final class ScheduleCreationViewController: UIViewController {
     
     var completionHandler: (([WeekDay]) -> Void)?
     
-    let theme = Theme()
+    private let theme = Theme.shared
     
     private lazy var tableView = UITableView()
     private lazy var readyButton = UIButton(type: .system)

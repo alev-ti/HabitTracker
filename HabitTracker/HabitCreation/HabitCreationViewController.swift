@@ -30,7 +30,7 @@ class HabitCreationViewController: UIViewController {
     
     weak var delegate: HabitCreationDelegate?
     
-    let theme = Theme()
+    private let theme = Theme.shared
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
@@ -148,23 +148,20 @@ class HabitCreationViewController: UIViewController {
         super.viewDidLoad()
         if let tracker = tracker,
            tracker.trackers.count > 0 {
-            self.selectedDays = tracker.trackers[0].schedule
-            self.selectedCategoryTitle = tracker.title
-            self.selectedEmoji = tracker.trackers[0].emoji
-            self.selectedColor = tracker.trackers[0].color
+            selectedDays = tracker.trackers[0].schedule
+            selectedCategoryTitle = tracker.title
+            selectedEmoji = tracker.trackers[0].emoji
+            selectedColor = tracker.trackers[0].color
             
-            self.nameTextField.text = tracker.trackers[0].name
-            self.tableViewData[0].text = tracker.title
-            self.tableViewData[1].text = self.getScheduleCellString(daysWeek: tracker.trackers[0].schedule)
+            nameTextField.text = tracker.trackers[0].name
+            tableViewData[0].text = tracker.title
+            tableViewData[1].text = getScheduleCellString(daysWeek: tracker.trackers[0].schedule)
         }
-        self.hideKeyboardWhenTapped()
+        hideKeyboardWhenTapped()
         setupUI()
     }
     
     private func getScheduleCellString(daysWeek: [WeekDay]) -> String {
-        if daysWeek.count == 7 {
-            return "Каждый день"
-        }
         let sortedDaysWeek = daysWeek.sorted()
         let selectedDaysString = sortedDaysWeek.map {$0.getShortName()}.joined(separator: ", ")
         return selectedDaysString
@@ -269,31 +266,31 @@ class HabitCreationViewController: UIViewController {
     }
     
     @objc private func createButtonTapped() {
-            self.dismiss(animated: true)
-            if let tracker = tracker,
-               tracker.trackers.count > 0 {
-                let id = tracker.trackers[0].id
-                let schedule = selectedDays
-                guard let name = nameTextField.text,
-                      let color = selectedColor,
-                      let emoji = selectedEmoji,
-                      let title = selectedCategoryTitle
-                else { return }
-                
-                let trackerCategory = TrackerCategory(title: title, trackers: [Tracker(id: id, name: name, color: color, emoji: emoji, isPinned: tracker.trackers[0].isPinned, schedule: schedule)])
-                delegate?.didCreateTracker(trackerCategory)
-            } else {
-                let id = UUID()
-                let schedule = selectedDays
-                guard let name = nameTextField.text,
-                      let color = selectedColor,
-                      let emoji = selectedEmoji,
-                      let title = selectedCategoryTitle
-                else { return }
-                
-                let trackerCategory = TrackerCategory(title: title, trackers: [Tracker(id: id, name: name, color: color, emoji: emoji, isPinned: false, schedule: schedule)])
-                delegate?.didCreateTracker(trackerCategory)
-            }
+        self.dismiss(animated: true)
+        if let tracker = tracker,
+           tracker.trackers.count > 0 {
+            let id = tracker.trackers[0].id
+            let schedule = selectedDays
+            guard let name = nameTextField.text,
+                  let color = selectedColor,
+                  let emoji = selectedEmoji,
+                  let title = selectedCategoryTitle
+            else { return }
+            
+            let trackerCategory = TrackerCategory(title: title, trackers: [Tracker(id: id, name: name, color: color, emoji: emoji, isPinned: tracker.trackers[0].isPinned, schedule: schedule)])
+            delegate?.didCreateTracker(trackerCategory)
+        } else {
+            let id = UUID()
+            let schedule = selectedDays
+            guard let name = nameTextField.text,
+                  let color = selectedColor,
+                  let emoji = selectedEmoji,
+                  let title = selectedCategoryTitle
+            else { return }
+            
+            let trackerCategory = TrackerCategory(title: title, trackers: [Tracker(id: id, name: name, color: color, emoji: emoji, isPinned: false, schedule: schedule)])
+            delegate?.didCreateTracker(trackerCategory)
+        }
     }
 }
 

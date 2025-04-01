@@ -5,7 +5,7 @@ protocol CreateNewCategoryDelegate: AnyObject {
 }
 
 final class CategoryScreenViewController: UIViewController {
-    private let theme = Theme()
+    private let theme = Theme.shared
     private let viewModel: CategoryViewModelProtocol
     
     private lazy var tableView = UITableView()

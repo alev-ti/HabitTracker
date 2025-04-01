@@ -2,7 +2,7 @@ import UIKit
 
 class StatisticsViewController: UIViewController {
     
-    private let theme = Theme()
+    private let theme = Theme.shared
     
     private lazy var stubView = createStubView()
     
