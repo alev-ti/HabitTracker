@@ -1,22 +1,28 @@
 import UIKit
 
 // Экран создания нерегулярного события
-final class IrregularEventCreationViewController: UIViewController {
+class IrregularEventCreationViewController: UIViewController {
+    init() {
+        self.tracker = nil
+        self.isTrackerCompletedToday = nil
+        super.init(nibName: nil, bundle: nil)
+    }
     
-    var onCancel: (() -> Void)?
-    var onCreate: ((TrackerCategory) -> Void)?
+    init(delegate: HabitCreationDelegate, trackerCategory: TrackerCategory, isTrackerCompletedToday: Bool) {
+        self.delegate = delegate
+        self.tracker = trackerCategory
+        self.isTrackerCompletedToday = isTrackerCompletedToday
+        super.init(nibName: nil, bundle: nil)
+    }
     
-    private lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Новое нерегулярное событие"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    required init?(coder: NSCoder) {
+        assertionFailure("init(coder:) has not been implemented")
+        return nil
+    }
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = NSLocalizedString("irregular_event_creation_view_controller.tracker_name_input_placeholder", comment: "placeholder Tracker's title")
         textField.backgroundColor = Color.lightGray
         textField.layer.cornerRadius = 16
         textField.font = UIFont.systemFont(ofSize: 16)
@@ -38,7 +44,7 @@ final class IrregularEventCreationViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("irregular_event_creation_view_controller.button_cancel", comment: "button cancel"), for: .normal)
         button.setTitleColor(Color.lightRed, for: .normal)
         button.layer.borderColor = Color.lightRed.cgColor
         button.layer.borderWidth = 1
@@ -48,11 +54,13 @@ final class IrregularEventCreationViewController: UIViewController {
         return button
     }()
     
-    private lazy var createButton: UIButton = {
+    lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(
+            NSLocalizedString("irregular_event_creation_view_controller.button_create", comment: "button create"),
+            for: .normal)
         button.backgroundColor = Color.gray
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(theme.buttonTitleColor, for: .normal)
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.isEnabled = false
@@ -68,7 +76,9 @@ final class IrregularEventCreationViewController: UIViewController {
         return label
     }()
     
-    private var tableViewData: [CellData] = [CellData(title: "Категория")]
+    private lazy var completedDaysLabel = UILabel()
+    
+    private var tableViewData: [CellData] = [CellData(title: NSLocalizedString("irregular_event_creation_view_controller.category", comment: "category title"))]
     
     private lazy var trackerDetailCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -94,23 +104,39 @@ final class IrregularEventCreationViewController: UIViewController {
         return collectionView
     }()
     
+    private let tracker: TrackerCategory?
+    private let isTrackerCompletedToday: Bool?
+    
     private var selectedEmoji: String?
     private var selectedEmojiIndexPath: IndexPath?
     private var selectedColor: UIColor?
     private var selectedColorIndexPath: IndexPath?
     private var selectedCategoryTitle: String?
     
+    weak var delegate: HabitCreationDelegate?
+    
+    private let theme = Theme.shared
+    
     let viewModel = CategoryViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let tracker = tracker,
+           tracker.trackers.count > 0 {
+            self.selectedCategoryTitle = tracker.title
+            self.selectedEmoji = tracker.trackers[0].emoji
+            self.selectedColor = tracker.trackers[0].color
+            
+            self.nameTextField.text = tracker.trackers[0].name
+            self.tableViewData[0].text = tracker.title
+        }
         setupUI()
         self.hideKeyboardWhenTapped()
     }
     
     private var trackerDetailCollectionViewData: [TrackerDetailCell] = [
         TrackerDetailCell(header: "Emoji", type: .emoji(TrackerDetails.emojis)),
-        TrackerDetailCell(header: "Цвет", type: .color(TrackerDetails.colors))
+        TrackerDetailCell(header: NSLocalizedString("irregular_event_creation_view_controller.color", comment: "color title"), type: .color(TrackerDetails.colors))
     ]
     
     private func validateForm() {
@@ -122,20 +148,19 @@ final class IrregularEventCreationViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = theme.backgroundColor
         
-        view.addSubview(titleLabel)
         view.addSubview(nameTextField)
         view.addSubview(tableView)
         view.addSubview(cancelButton)
         view.addSubview(createButton)
         view.addSubview(trackerDetailCollectionView)
         
+        let trackerInitialized = tracker != nil && isTrackerCompletedToday != nil
+        
+        configureCompletedLabel()
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            nameTextField.topAnchor.constraint(equalTo: trackerInitialized ? completedDaysLabel.bottomAnchor : view.topAnchor, constant: trackerInitialized ? 40 : 54),
             nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             nameTextField.heightAnchor.constraint(equalToConstant: 75),
@@ -179,18 +204,49 @@ final class IrregularEventCreationViewController: UIViewController {
     }
     
     @objc private func cancelButtonTapped() {
-        onCancel?()
+        self.dismiss(animated: true)
     }
     
     @objc private func createButtonTapped() {
-        guard let name = nameTextField.text,
-              !name.isEmpty,
-              let color = selectedColor,
-              let emoji = selectedEmoji,
-              let categoryTitle = selectedCategoryTitle
-        else { return }
-        let tracker = Tracker(id: UUID(), name: name, color: color, emoji: emoji, schedule: [])
-        onCreate?(TrackerCategory(title: categoryTitle, trackers: [tracker]))
+        self.dismiss(animated: true)
+        
+        if let tracker = tracker,
+           tracker.trackers.count > 0 {
+            let id = tracker.trackers[0].id
+            guard let name = nameTextField.text,
+                  let color = selectedColor,
+                  let emoji = selectedEmoji,
+                  let title = selectedCategoryTitle
+            else { return }
+            
+            let trackerCategory = TrackerCategory(title: title, trackers: [Tracker(id: id, name: name, color: color, emoji: emoji, isPinned: tracker.trackers[0].isPinned, schedule: [])])
+            delegate?.didCreateTracker(trackerCategory)
+        } else {
+            let id = UUID()
+            guard let name = nameTextField.text,
+                  let color = selectedColor,
+                  let emoji = selectedEmoji,
+                  let title = selectedCategoryTitle
+            else { return }
+            let trackerCategory = TrackerCategory(title: title, trackers: [Tracker(id: id, name: name, color: color, emoji: emoji, isPinned: false, schedule: [])])
+            delegate?.didCreateTracker(trackerCategory)
+        }
+    }
+    
+    func configureCompletedLabel() {
+        guard let _ = tracker, let isTrackerCompletedToday else { return }
+        completedDaysLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(completedDaysLabel)
+        
+        completedDaysLabel.text = isTrackerCompletedToday ? "Выполнено" : "Не выполнено"
+        completedDaysLabel.textAlignment = .center
+        completedDaysLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        
+        NSLayoutConstraint.activate([
+            completedDaysLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 64),
+            completedDaysLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            completedDaysLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+        ])
     }
 }
 
@@ -290,6 +346,12 @@ extension IrregularEventCreationViewController: UICollectionViewDelegate,UIColle
                 }
             cell.prepareForReuse()
             cell.configureCell(emoji: emojis[indexPath.item])
+            if let tracker = tracker,
+               tracker.trackers.count > 0,
+               emojis[indexPath.row] == tracker.trackers[0].emoji {
+                cell.selectCell(select: true)
+                self.selectedEmojiIndexPath = indexPath
+            }
             return cell
         case .color(let colors):
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.identifier, for: indexPath) as? ColorCell else {
@@ -297,6 +359,12 @@ extension IrregularEventCreationViewController: UICollectionViewDelegate,UIColle
                 }
             cell.prepareForReuse()
             cell.configureCell(colors[indexPath.row])
+            if let tracker = tracker,
+               tracker.trackers.count > 0,
+               colors[indexPath.row] == tracker.trackers[0].color {
+                cell.selectCell(select: true)
+                self.selectedColorIndexPath = indexPath
+            }
             return cell
         }
     }

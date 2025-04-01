@@ -52,8 +52,10 @@ final class TrackerCategoryStore: NSObject {
                 guard let colorString = $0.color, let color = UIColor(hex: colorString) else {
                     throw TrackerCategoryStoreError.decodingErrorInvalid
                 }
+                
+                let isPinned = $0.isPinned
 
-                return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule )
+                return Tracker(id: id, name: name, color: color, emoji: emoji, isPinned: isPinned, schedule: schedule )
             }
             return TrackerCategory(title: title, trackers: trackers)
         }

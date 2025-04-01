@@ -50,7 +50,7 @@ final class OnboardingScreenViewController: UIViewController {
     }
     
     private func configureContinueButton() {
-        continueButton.setTitle("Вот это технологии!", for: .normal)
+        continueButton.setTitle(NSLocalizedString("onboarding_screen_view_controller.button_ok", comment: "onboarding button ok"), for: .normal)
         continueButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         continueButton.setTitleColor(.white, for: .normal)
         continueButton.backgroundColor = Color.lightBlack

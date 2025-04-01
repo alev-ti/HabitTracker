@@ -1,6 +1,16 @@
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func cellButtonDidTapped(_ cell: TrackerCell)
+}
+
 final class TrackerCell: UICollectionViewCell {
+    
+    static let identifier: String = "TrackerCell"
+    
+    weak var delegate: TrackerCellDelegate?
+    
+    private let theme = Theme.shared
     
     private lazy var cardView: UIView = {
         let view = UIView()
@@ -48,13 +58,18 @@ final class TrackerCell: UICollectionViewCell {
     private lazy var daysCountLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = .black
-        label.text = "0 дней"
+        label.textColor = theme.textColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private var completionHandler: (() -> Void)?
+    private lazy var pinSquare: UIImageView = {
+        let pinSquare = UIImageView()
+        pinSquare.contentMode = .center
+        pinSquare.image = UIImage(named: "pin")
+        pinSquare.translatesAutoresizingMaskIntoConstraints = false
+        return pinSquare
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -67,13 +82,14 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func setupUI() {
+        self.layer.cornerRadius = 16
         contentView.addSubview(cardView)
         contentView.addSubview(completionButton)
         contentView.addSubview(daysCountLabel)
-        
         cardView.addSubview(emojiBackgroundView)
         emojiBackgroundView.addSubview(emojiLabel)
         cardView.addSubview(nameLabel)
+        contentView.addSubview(pinSquare)
         
         NSLayoutConstraint.activate([
             cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -86,11 +102,11 @@ final class TrackerCell: UICollectionViewCell {
             emojiBackgroundView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
             emojiBackgroundView.widthAnchor.constraint(equalToConstant: 32),
             emojiBackgroundView.heightAnchor.constraint(equalToConstant: 32),
-
+            
             // Центрируем эмоджи внутри фона
             emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
-
+            
             nameLabel.topAnchor.constraint(equalTo: emojiBackgroundView.bottomAnchor, constant: 8),
             nameLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 12),
             nameLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -12),
@@ -102,48 +118,57 @@ final class TrackerCell: UICollectionViewCell {
             completionButton.heightAnchor.constraint(equalToConstant: 34),
             
             daysCountLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            daysCountLabel.centerYAnchor.constraint(equalTo: completionButton.centerYAnchor)
+            daysCountLabel.centerYAnchor.constraint(equalTo: completionButton.centerYAnchor),
+            
+            pinSquare.heightAnchor.constraint(equalToConstant: 24),
+            pinSquare.widthAnchor.constraint(equalToConstant: 24),
+            pinSquare.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -8),
+            pinSquare.centerYAnchor.constraint(equalTo: emojiLabel.centerYAnchor)
         ])
         
         // Делаем фон круглым после установки констрейнтов
         emojiBackgroundView.layer.cornerRadius = 16
         emojiBackgroundView.clipsToBounds = true
-
+        
         completionButton.addTarget(self, action: #selector(completionButtonTapped), for: .touchUpInside)
     }
-
     
-    func configure(with tracker: Tracker, isCompleted: Bool, daysCount: Int, completionHandler: @escaping () -> Void) {
-        emojiLabel.text = tracker.emoji
-        nameLabel.text = tracker.name
-        cardView.backgroundColor = tracker.color
-        self.completionHandler = completionHandler
-        
-        let image = isCompleted ? UIImage(systemName: "checkmark") : UIImage(systemName: "plus")
-        completionButton.setImage(image, for: .normal)
-        completionButton.backgroundColor = isCompleted ? tracker.color.withAlphaComponent(0.4) : tracker.color
-        
-        let isIrregularEvent = tracker.schedule.isEmpty
-        if isIrregularEvent {
-            daysCountLabel.text = isCompleted ? "Выполнено" : "Не выполнено"
-        } else {
-            daysCountLabel.text = "\(daysCount) \(dayString(for: daysCount))"
-        }
+    func configure(name: String, emoji: String, color: UIColor, delegate: TrackerCellDelegate, isPinned: Bool) {
+        self.nameLabel.text = name
+        self.emojiLabel.text = emoji
+        self.cardView.backgroundColor = color
+        self.emojiBackgroundView.backgroundColor = .white.withAlphaComponent(0.3)
+        self.completionButton.backgroundColor = color
+        self.delegate = delegate
+        self.pinSquare.image = isPinned ? UIImage(named: "pin") : nil
     }
     
-    private func dayString(for count: Int) -> String {
-        let remainder = count % 10
-        switch remainder {
-        case 1:
-            return "день"
-        case 2...4:
-            return "дня"
-        default:
-            return "дней"
+    func changeCompletionStatus(days: Int, isCompleted: Bool, trackerType: TrackerType) {
+        switch trackerType {
+            case .habit:
+                let daysString = String.localizedStringWithFormat(
+                    NSLocalizedString("days_count", comment: "quantity of days"),
+                    days)
+                
+                let imageName = isCompleted ? "checkmark" : "plus"
+                let alpha: CGFloat = isCompleted ? 0.3 : 1.0
+                
+                daysCountLabel.text = daysString
+                completionButton.setImage(UIImage(systemName: imageName), for: .normal)
+                completionButton.backgroundColor = completionButton.backgroundColor?.withAlphaComponent(alpha)
+            case .irregularEvent:
+                let isDone = isCompleted || days > 0
+                let textKey = isDone ? "tracker_cell.completed" : "tracker_cell.not_completed"
+                let imageName = isDone ? "checkmark" : "plus"
+                let alpha: CGFloat = isDone ? 0.3 : 1.0
+                
+                daysCountLabel.text = NSLocalizedString(textKey, comment: "")
+                completionButton.setImage(UIImage(systemName: imageName), for: .normal)
+                completionButton.backgroundColor = completionButton.backgroundColor?.withAlphaComponent(alpha)
         }
     }
     
     @objc private func completionButtonTapped() {
-        completionHandler?()
+        delegate?.cellButtonDidTapped(self)
     }
 }

@@ -13,7 +13,8 @@ final class RootViewController: UIViewController {
     }
     
     private func setupTabBar() {
-        let tabBarController = MainTabBarController()
+        let statisticsService = StatisticsProvider()
+        let tabBarController = MainTabBarController(statisticsService: statisticsService)
         addChild(tabBarController)
         view.addSubview(tabBarController.view)
         tabBarController.view.frame = view.bounds

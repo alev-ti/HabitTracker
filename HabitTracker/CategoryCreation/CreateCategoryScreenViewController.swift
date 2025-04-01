@@ -5,7 +5,7 @@ final class CreateCategoryScreenViewController: UIViewController {
     private lazy var nameCategoryTextField: UITextField = {
         let textField = UITextField()
         textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = NSLocalizedString("create_category_screen_view_controller.category_name_input_placeholder", comment: "placeholder Category's title")
         textField.textColor = .black
         textField.backgroundColor = Color.lightGray
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 40))
@@ -20,7 +20,7 @@ final class CreateCategoryScreenViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = Color.gray
         button.isEnabled = false
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("create_category_screen_view_controller.button_done", comment: "button done"), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.layer.cornerRadius = 16
         button.clipsToBounds = true
@@ -68,7 +68,7 @@ extension CreateCategoryScreenViewController: UITextFieldDelegate {
 private extension CreateCategoryScreenViewController {
     func setupUI() {
         view.backgroundColor = .white
-        title = "Новая категория"
+        title = NSLocalizedString("create_category_screen_view_controller.title", comment: "New category title")
         setupNameTextField()
         setupDoneButton()
     }

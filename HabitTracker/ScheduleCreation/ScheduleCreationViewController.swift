@@ -4,6 +4,8 @@ final class ScheduleCreationViewController: UIViewController {
     
     var completionHandler: (([WeekDay]) -> Void)?
     
+    private let theme = Theme.shared
+    
     private lazy var tableView = UITableView()
     private lazy var readyButton = UIButton(type: .system)
     weak var delegate: ScheduleSelectionDelegate?
@@ -36,7 +38,8 @@ extension ScheduleCreationViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: ScheduleTableViewCell.reuseIdentifier, for: indexPath)
         
         guard let scheduleTableViewCell = cell as? ScheduleTableViewCell else { return UITableViewCell() }
-        scheduleTableViewCell.configureCell(nameLabel: tableViewData[indexPath.row].rawValue)
+        let day = tableViewData[indexPath.row]
+        scheduleTableViewCell.configureCell(nameLabel: day.localized)
         if selectedDays.contains(tableViewData[indexPath.row]) {
             scheduleTableViewCell.toggleOn()
         }
@@ -81,17 +84,18 @@ extension ScheduleCreationViewController: UITableViewDelegate {
 
 private extension ScheduleCreationViewController {
     private func setupUI() {
-        view.backgroundColor = .white
-        self.title = "Расписание"
+        view.backgroundColor = theme.backgroundColor
+        self.title = NSLocalizedString("schedule_creation_view_controller.title", comment: "Schedule title")
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: theme.textColor]
         configureReadyButton()
         configureTableView()
     }
     
     private func configureReadyButton() {
         readyButton.translatesAutoresizingMaskIntoConstraints = false
-        readyButton.backgroundColor = Color.lightBlack
-        readyButton.setTitle("Готово", for: .normal)
-        readyButton.setTitleColor(.white, for: .normal)
+        readyButton.backgroundColor = theme.textColor
+        readyButton.setTitle(NSLocalizedString("schedule_creation_view_controller.button_done", comment: "button done"), for: .normal)
+        readyButton.setTitleColor(theme.buttonTitleColor, for: .normal)
         readyButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         readyButton.layer.cornerRadius = 16
         readyButton.clipsToBounds = true
